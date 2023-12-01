@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">LoginScreen</string>
+    <string name="Login">Login</string>
+    <string name="SignUp">Sign Up</string>
+    <string name="passView">Password Login</string>
+    <string name="Feed">Feed</string>
+
+
+
+</resources>

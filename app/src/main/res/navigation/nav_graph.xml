@@ -1,0 +1,43 @@
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/login">
+
+    <composable
+        android:id="@+id/login"
+        android:label="login">
+        <action
+            android:id="@+id/action_login_to_signup"
+            app:destination="@id/signup">
+            <argument
+                android:name="name"
+                app:argType="string" />
+        </action>
+    </composable>
+
+    <composable
+        android:id="@+id/signup"
+        android:label="signup">
+        <argument
+            android:name="name"
+            app:argType="string" />
+    </composable>
+
+    <composable
+        android:id="@+id/passwordLogin"
+        android:label="passwordLogin">
+        <argument
+            android:name="name"
+            app:argType="string" />
+    </composable>
+
+    <composable
+        android:id="@+id/feed"
+        android:label="feed">
+        <argument
+            android:name="name"
+            app:argType="string" />
+    </composable>
+
+</navigation>

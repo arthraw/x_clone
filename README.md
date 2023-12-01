@@ -1,7 +1,7 @@
 # x_clone
 ---
 
-Este app consiste em um clone do X (ex Tweeter), fiz ele pensando em melhorar minhas habilidades com aplicações android.
+Este app consiste em um clone do X focando na parte de login, fiz ele pensando em melhorar minhas habilidades com aplicações android no quesito autenticação.
 
 ## Tecnologias:
 

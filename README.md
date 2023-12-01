@@ -8,6 +8,7 @@ Este app consiste em um clone do X (ex Tweeter), fiz ele pensando em melhorar mi
 - UI: *Compose*;
 - Interatividade e Backend: *Kotlin*;
 - ORM: *ROOM*;
+- Arquitetura: *MVVM*
 
 ## Telas:
 

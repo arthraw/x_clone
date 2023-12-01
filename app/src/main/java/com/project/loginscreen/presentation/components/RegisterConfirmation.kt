@@ -144,7 +144,9 @@ private fun ConfirmationDraw(
                     .fillMaxWidth(),
                 fontWeight = FontWeight.Bold,
                 fontSize = 30.sp,
-                color = Color.White
+                letterSpacing = 1.sp,
+                color = Color.White,
+                lineHeight = 30.sp
             )
         }
         Spacer(modifier = Modifier.padding(50.dp))
@@ -177,7 +179,7 @@ private fun toFeedButton(navController: NavController) {
         ) {
             Button(
                 onClick = {
-                    navController.navigate(Screen.Feed.route)
+                    navController.navigate(Screen.LoginScreen.route)
                 },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFF03A9F4),
@@ -200,14 +202,5 @@ private fun toFeedButton(navController: NavController) {
                 )
             }
         }
-    }
-}
-
-@Preview
-@Composable
-fun Preview() {
-    LoginScreenTheme {
-        val navController = rememberNavController()
-        RegisterConfirmation(navController)
     }
 }

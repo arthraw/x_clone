@@ -3,6 +3,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("com.google.devtools.ksp")
+    id ("com.google.dagger.hilt.android")
 }
 
 android {
@@ -52,6 +53,8 @@ android {
 }
 
 dependencies {
+    implementation("com.google.dagger:hilt-android:2.44")
+    ksp("com.google.dagger:hilt-compiler:2.44")
     val roomVersion = "2.4.1"
 
     implementation("androidx.room:room-runtime:$roomVersion")

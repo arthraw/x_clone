@@ -13,6 +13,6 @@ abstract class LoginScreenDataBase : RoomDatabase() {
     abstract fun userDao() : UserDao
 
     companion object {
-        const val DATABASE_NAME = "login_screen_db"
+        const val DATABASE_NAME = "login_screen"
     }
 }

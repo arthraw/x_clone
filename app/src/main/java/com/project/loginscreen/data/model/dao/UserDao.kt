@@ -16,7 +16,5 @@ interface UserDao {
     suspend fun readUser(id: Long) : List<UserEntity>
     @Update
     suspend fun updateUser(user : UserEntity) : UserEntity
-//    @Delete
-//    suspend fun deleteUser(name : String)
 
 }

@@ -56,7 +56,7 @@ import com.project.loginscreen.presentation.components.BirthdayDate
 import com.project.loginscreen.presentation.components.BirthdayText
 import com.project.loginscreen.presentation.theme.LoginScreenTheme
 
-class SignUpView : ComponentActivity() {
+class SignUpActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {

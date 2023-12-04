@@ -2,7 +2,6 @@ package com.project.loginscreen.presentation.login
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -60,7 +59,7 @@ import com.project.loginscreen.presentation.Screen
 import com.project.loginscreen.presentation.components.AlertDialogBox
 import com.project.loginscreen.presentation.theme.LoginScreenTheme
 
-class PasswordView : ComponentActivity() {
+class PasswordActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {

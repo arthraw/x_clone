@@ -69,11 +69,9 @@ import com.project.loginscreen.presentation.components.AlertDialogBox
 import com.project.loginscreen.presentation.components.RegisterConfirmation
 import com.project.loginscreen.presentation.feed.FeedScreen
 import com.project.loginscreen.presentation.theme.LoginScreenTheme
-import kotlinx.coroutines.delay
-import java.lang.Exception
 
 
-class LoginView : ComponentActivity() {
+class LoginActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {

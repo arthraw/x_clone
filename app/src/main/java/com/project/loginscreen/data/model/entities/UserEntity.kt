@@ -12,3 +12,5 @@ data class UserEntity(
     val password : String,
     val birthDate : Long?
 )
+
+class InvalidUserException(message: String): Exception(message)

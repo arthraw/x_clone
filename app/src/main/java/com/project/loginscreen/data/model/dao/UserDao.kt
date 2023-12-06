@@ -11,12 +11,10 @@ import java.util.concurrent.Flow
 @Dao
 interface UserDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun createUser(user : UserEntity) : UserEntity
+    fun createUser(user : UserEntity)
     @Query("SELECT * FROM UserEntity WHERE userId = :id")
-    suspend fun readUser(id: Long) : List<UserEntity>
+    fun readUser(id: Long) : List<UserEntity>
     @Update
-    suspend fun updateUser(user : UserEntity) : UserEntity
-//    @Delete
-//    suspend fun deleteUser(name : String)
+    fun updateUser(user : UserEntity) : Int
 
 }

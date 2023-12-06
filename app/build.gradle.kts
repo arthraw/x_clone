@@ -1,4 +1,5 @@
 
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -21,7 +22,11 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+        ksp {
+            arg("room.schemaLocation", "$projectDir/schemas")
+        }
     }
+
 
     buildTypes {
         release {
@@ -33,12 +38,15 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = JavaVersion.VERSION_17.toString()
     }
+//    kotlin{
+//        jvmToolchain(8)
+//    }
     buildFeatures {
         compose = true
     }
@@ -52,10 +60,13 @@ android {
     }
 }
 
+
 dependencies {
-    implementation("com.google.dagger:hilt-android:2.44")
-    ksp("com.google.dagger:hilt-compiler:2.44")
-    val roomVersion = "2.4.1"
+
+    implementation("com.google.dagger:hilt-android:2.48")
+    ksp("com.google.dagger:hilt-compiler:2.48")
+
+    val roomVersion = "2.4.2"
 
     implementation("androidx.room:room-runtime:$roomVersion")
     annotationProcessor("androidx.room:room-compiler:$roomVersion")

@@ -25,7 +25,9 @@ import androidx.navigation.compose.rememberNavController
 import com.project.loginscreen.R
 import com.project.loginscreen.presentation.login.setUpNavHost
 import com.project.loginscreen.presentation.theme.LoginScreenTheme
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class FeedActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

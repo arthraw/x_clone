@@ -69,8 +69,11 @@ import com.project.loginscreen.presentation.components.AlertDialogBox
 import com.project.loginscreen.presentation.components.RegisterConfirmation
 import com.project.loginscreen.presentation.feed.FeedScreen
 import com.project.loginscreen.presentation.theme.LoginScreenTheme
+import com.project.loginscreen.presentation.user.UserViewModel
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
-
+@AndroidEntryPoint
 class LoginActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -100,6 +103,7 @@ class LoginActivity : ComponentActivity() {
         }
     }
 }
+
 
 @SuppressLint("ComposableNaming")
 @Composable
@@ -366,6 +370,9 @@ fun loginLabel(
     var isFocused by remember { mutableStateOf(false) }
     var validFormNameFlag by remember { mutableStateOf(false) }
     var isValid by remember { mutableStateOf(false) }
+
+//    val viewModel: UserViewModel = UserViewModel()
+
 
     Column(modifier) {
         Row(

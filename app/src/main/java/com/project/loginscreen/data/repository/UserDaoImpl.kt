@@ -7,15 +7,15 @@ import javax.inject.Inject
 class UserDaoImpl @Inject constructor(
     private val dao: UserDao
 ): UserDao {
-    override suspend fun createUser(user: UserEntity): UserEntity {
+    override fun createUser(user: UserEntity) {
         return dao.createUser(user)
     }
 
-    override suspend fun readUser(userId: Long): List<UserEntity> {
+    override fun readUser(userId: Long): List<UserEntity> {
         return dao.readUser(userId)
     }
 
-    override suspend fun updateUser(user: UserEntity): UserEntity {
+    override fun updateUser(user: UserEntity): Int {
         return dao.updateUser(user)
     }
 }

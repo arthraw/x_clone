@@ -1,7 +1,10 @@
 package com.project.loginscreen.data.repository
 
+import androidx.lifecycle.LiveData
 import com.project.loginscreen.data.model.dao.UserDao
 import com.project.loginscreen.data.model.entities.UserEntity
+import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class UserDaoImpl @Inject constructor(
@@ -17,5 +20,9 @@ class UserDaoImpl @Inject constructor(
 
     override fun updateUser(user: UserEntity): Int {
         return dao.updateUser(user)
+    }
+
+    override fun checkUser(name: String) : String {
+        return dao.checkUser(name)
     }
 }

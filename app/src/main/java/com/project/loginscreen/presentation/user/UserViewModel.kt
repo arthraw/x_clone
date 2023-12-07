@@ -30,9 +30,15 @@ class UserViewModel @Inject constructor(
     fun onEvent(event: UserEvent) {
         when(event) {
             is UserEvent.EnteredName -> {
-                _userName.value = userName.value.copy(
-                    text = event.value
-                )
+                viewModelScope.launch {
+                    if (userName.value.text == useCases.searchUser(userName.value.text)) {
+                        _userName.value = userName.value.copy(
+                            text = event.value
+                        )
+                    } else {
+                        throw Exception("teste de busca")
+                    }
+                }
             }
             is UserEvent.EnteredEmail -> {
                 _userEmail.value = userEmail.value.copy(
@@ -60,8 +66,8 @@ class UserViewModel @Inject constructor(
                                 birthDate = userBirthday.value.text?.toLong()
                             )
                         )
-                    } catch (e : InvalidUserException) {
-                        throw e
+                    } catch (e : Exception) {
+                        throw InvalidUserException("ERROR: Error in user insert.")
                     }
                 }
             }

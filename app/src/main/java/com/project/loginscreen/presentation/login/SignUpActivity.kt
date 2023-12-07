@@ -50,15 +50,18 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.project.loginscreen.R
-import com.project.loginscreen.presentation.Screen
+import com.project.loginscreen.utils.Screen
 import com.project.loginscreen.presentation.components.AlertDialogBox
 import com.project.loginscreen.presentation.components.BirthdayDate
 import com.project.loginscreen.presentation.components.BirthdayText
 import com.project.loginscreen.presentation.theme.LoginScreenTheme
+import com.project.loginscreen.presentation.user.UserViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class SignUpActivity : ComponentActivity() {
+    private lateinit var viewModel: UserViewModel
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -68,7 +71,7 @@ class SignUpActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     val navController = rememberNavController()
-                    setUpNavHost(navController = navController)
+                    setUpNavHost(navController = navController, viewModel = viewModel)
                 }
             }
         }

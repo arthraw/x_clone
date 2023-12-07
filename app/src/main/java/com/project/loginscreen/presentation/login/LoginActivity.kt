@@ -2,6 +2,7 @@ package com.project.loginscreen.presentation.login
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -56,6 +57,11 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleCoroutineScope
+import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -64,19 +70,24 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.project.loginscreen.R
-import com.project.loginscreen.presentation.Screen
+import com.project.loginscreen.utils.Screen
 import com.project.loginscreen.presentation.components.AlertDialogBox
 import com.project.loginscreen.presentation.components.RegisterConfirmation
 import com.project.loginscreen.presentation.feed.FeedScreen
 import com.project.loginscreen.presentation.theme.LoginScreenTheme
+import com.project.loginscreen.presentation.user.UserEvent
 import com.project.loginscreen.presentation.user.UserViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
+import kotlin.coroutines.CoroutineContext
+
 
 @AndroidEntryPoint
 class LoginActivity : ComponentActivity() {
+    private lateinit var viewModel: UserViewModel
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        viewModel = ViewModelProvider(this).get(UserViewModel::class.java)
+
         setContent {
             var openDialog by remember { mutableStateOf(false) }
             Box(
@@ -89,7 +100,7 @@ class LoginActivity : ComponentActivity() {
                         color = MaterialTheme.colorScheme.background
                     ) {
                         val navController = rememberNavController()
-                        setUpNavHost(navController = navController)
+                        setUpNavHost(navController = navController, viewModel = viewModel)
                         AlertDialogBox(
                             text = "Insira um nome ou crie uma conta clicando em 'inscreva-se'",
                             openDialog = openDialog,
@@ -103,11 +114,8 @@ class LoginActivity : ComponentActivity() {
         }
     }
 }
-
-
-@SuppressLint("ComposableNaming")
 @Composable
-fun setUpNavHost(navController: NavHostController) {
+fun setUpNavHost(navController: NavHostController, viewModel: UserViewModel) {
     NavHost(
         navController = navController,
         startDestination = Screen.LoginScreen.route
@@ -117,7 +125,7 @@ fun setUpNavHost(navController: NavHostController) {
             popEnterTransition = { slideIntoContainer(towards = AnimatedContentTransitionScope.SlideDirection.Left) },
             popExitTransition = { slideOutOfContainer(towards = AnimatedContentTransitionScope.SlideDirection.Right) }
         ) {
-            LoginScreenLoader(navController = navController)
+            LoginScreenLoader(navController = navController, viewModel = viewModel)
         }
         composable(
             route = Screen.SignUpScreen.route,
@@ -138,7 +146,7 @@ fun setUpNavHost(navController: NavHostController) {
             enterTransition = { slideIntoContainer(towards = AnimatedContentTransitionScope.SlideDirection.Start) },
             exitTransition = { slideOutOfContainer(towards = AnimatedContentTransitionScope.SlideDirection.Start) }
         ) {entry ->
-            PasswordCheckLoader(navController = navController, name = entry.arguments?.getString("name"))
+            PasswordCheckLoader(navController = navController, name = entry.arguments?.getString("name"), viewModel = viewModel)
         }
         composable(
             route = Screen.Success.route,
@@ -158,7 +166,7 @@ fun setUpNavHost(navController: NavHostController) {
 }
 
 @Composable
-fun LoginScreenLoader(navController: NavHostController) {
+fun LoginScreenLoader(navController: NavHostController, viewModel: UserViewModel) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -233,7 +241,8 @@ fun LoginScreenLoader(navController: NavHostController) {
                 label = "E-mail ou nome de usuário",
                 accountMessage = "Não tem uma conta?",
                 entry = "Inscreva-se",
-                navController = navController
+                navController = navController,
+                viewModel = viewModel
             )
         }
     }
@@ -363,15 +372,14 @@ fun loginLabel(
     accountMessage: String = "",
     entry: String = "",
     showText: Boolean = true,
-    navController: NavController
+    navController: NavController,
+    viewModel: UserViewModel
 ) {
     var text by remember { mutableStateOf(TextFieldValue("")) }
     val context = LocalContext.current
     var isFocused by remember { mutableStateOf(false) }
     var validFormNameFlag by remember { mutableStateOf(false) }
     var isValid by remember { mutableStateOf(false) }
-
-//    val viewModel: UserViewModel = UserViewModel()
 
 
     Column(modifier) {
@@ -412,6 +420,9 @@ fun loginLabel(
                         text = changeValue,
                         selection = TextRange(changeValue.length)
                     )
+//                    text = viewModel.userName.value
+
+//                    viewModel.onEvent(UserEvent.EnteredName(text.text))
                 },
                 modifier = Modifier
                     .clip(shape = RoundedCornerShape(3.dp))
@@ -461,6 +472,8 @@ fun loginLabel(
                         if (isValid) {
                             validFormNameFlag = false
                             navController.navigate(Screen.PasswordScreen.withArgs(text.text))
+                            text = viewModel.userName.value
+                            viewModel.onEvent(UserEvent.EnteredName(text.text))
                         }
                         else {
                             validFormNameFlag = true

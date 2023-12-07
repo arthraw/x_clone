@@ -7,6 +7,7 @@ import com.project.loginscreen.data.model.dao.UserDao
 import com.project.loginscreen.data.repository.UserDaoImpl
 import com.project.loginscreen.presentation.user.use_cases.AddUser
 import com.project.loginscreen.presentation.user.use_cases.EditUser
+import com.project.loginscreen.presentation.user.use_cases.SearchUser
 import com.project.loginscreen.presentation.user.use_cases.ShowUser
 import com.project.loginscreen.presentation.user.use_cases.UserUseCases
 import dagger.Module
@@ -41,7 +42,8 @@ object AppModule {
         return UserUseCases(
             addUser = AddUser(dao),
             editUser = EditUser(dao),
-            showUser = ShowUser(dao)
+            showUser = ShowUser(dao),
+            searchUser = SearchUser(dao)
         )
     }
 }

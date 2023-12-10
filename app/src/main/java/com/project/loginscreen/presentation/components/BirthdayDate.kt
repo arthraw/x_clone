@@ -1,13 +1,12 @@
 package com.project.loginscreen.presentation.components
 
-import android.widget.Toast
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -17,8 +16,6 @@ import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.Button
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -35,14 +32,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.project.loginscreen.R
 import java.sql.Date
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -50,12 +44,11 @@ import java.util.TimeZone
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BirthdayDate() {
+fun BirthdayDate(newSelectedDate: TextFieldValue, onValueChange: (TextFieldValue) -> Unit) {
     var showDataDialog by remember { mutableStateOf(false) }
-    var selectedDate  by remember { mutableStateOf("") }
+    var selectedDate by remember { mutableStateOf(TextFieldValue()) }
     val datePickerState = rememberDatePickerState()
     val focusManager = LocalFocusManager.current
-    val context = LocalContext.current
 
     if (showDataDialog) {
         DatePickerDialog(
@@ -63,12 +56,12 @@ fun BirthdayDate() {
             confirmButton = {
                 Button(
                     onClick = {
-                        datePickerState
-                            .selectedDateMillis?.let { millis ->
-                                selectedDate = millis.toBrazilianDateFormat()
-
-                            }
-                            showDataDialog = false
+                        datePickerState.selectedDateMillis?.let { millis ->
+                            val formattedDate = millis.toBrazilianDateFormat()
+                            selectedDate = TextFieldValue(text = formattedDate)
+                            onValueChange(TextFieldValue(text = formattedDate))
+                        }
+                        showDataDialog = false
                     }
                 ) {
                     Text(text = "Escolher data")
@@ -78,22 +71,18 @@ fun BirthdayDate() {
         }
     }
 
-    Column (
+    Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Row (
+        Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
             TextField(
                 value = selectedDate,
                 onValueChange = {
-                    val input = if (it.isBlank()) {
-                        val alert = Toast.makeText(context, "Este campo não pode ser vazio", Toast.LENGTH_SHORT)
-                    } else {
-
-                    }
+                    selectedDate = it
                 },
                 modifier = Modifier
                     .clip(shape = RoundedCornerShape(3.dp))
@@ -105,8 +94,7 @@ fun BirthdayDate() {
                             showDataDialog = true
                             focusManager.clearFocus(force = true)
                         }
-                    }
-                ,
+                    },
                 colors = TextFieldDefaults.colors(
                     focusedTextColor = Color.White,
                     unfocusedTextColor = Color.LightGray,
@@ -132,6 +120,7 @@ fun BirthdayDate() {
         }
     }
 }
+
 fun Long.toBrazilianDateFormat(
     pattern: String = "dd/MM/yyyy"
 ): String {
@@ -148,12 +137,12 @@ fun Long.toBrazilianDateFormat(
 fun BirthdayText(
     modifier: Modifier,
 ) {
-    Column (
+    Column(
         modifier = modifier,
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.Start
     ) {
-        Row (
+        Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Start
         ) {
@@ -165,7 +154,7 @@ fun BirthdayText(
             )
         }
         Spacer(modifier = Modifier.padding(2.dp))
-        Row (
+        Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Start
         ) {

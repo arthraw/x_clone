@@ -1,6 +1,7 @@
 package com.project.loginscreen.presentation.login
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.BorderStroke
@@ -19,8 +20,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.Button
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -28,6 +34,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -39,6 +46,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
@@ -47,18 +55,25 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.LifecycleCoroutineScope
+import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.project.loginscreen.R
-import com.project.loginscreen.presentation.Screen
+import com.project.loginscreen.utils.Screen
 import com.project.loginscreen.presentation.components.AlertDialogBox
-import com.project.loginscreen.presentation.components.BirthdayDate
 import com.project.loginscreen.presentation.components.BirthdayText
+import com.project.loginscreen.presentation.components.toBrazilianDateFormat
 import com.project.loginscreen.presentation.theme.LoginScreenTheme
+import com.project.loginscreen.presentation.user.UserEvent
+import com.project.loginscreen.presentation.user.UserViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class SignUpActivity : ComponentActivity() {
+    private lateinit var viewModel: UserViewModel
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -68,15 +83,16 @@ class SignUpActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     val navController = rememberNavController()
-                    setUpNavHost(navController = navController)
+                    setUpNavHost(navController = navController, viewModel = viewModel)
                 }
             }
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SignUpScreenLoader(navController: NavController) {
+fun SignUpScreenLoader(navController: NavController, viewModel: UserViewModel) {
 
     var name by remember { mutableStateOf(TextFieldValue("")) }
     var email by remember { mutableStateOf(TextFieldValue("")) }
@@ -87,6 +103,7 @@ fun SignUpScreenLoader(navController: NavController) {
     var isValidEmail by remember { mutableStateOf(false) }
     var isValidPassword by remember { mutableStateOf(false) }
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
+    var selectedDate by remember { mutableStateOf(TextFieldValue("")) }
 
 
     Column(
@@ -153,19 +170,25 @@ fun SignUpScreenLoader(navController: NavController) {
                         maxLines = 1,
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-                        onValueChange = { input: TextFieldValue ->
-                            val changeValue: String = input.text.ifBlank {
-                                input.text.toString()
-
-                            }
-                            name = input.copy(
-                                text = changeValue,
-                                selection = TextRange(changeValue.length)
+                        onValueChange = {
+//                            val changeValue: String = it.text.ifBlank {
+//                                it.text.toString()
+//
+//                            }
+                            name = it.copy(
+                                text = it.text,
+                                selection = TextRange(it.text.length)
                             )
+                            viewModel.onEvent(UserEvent.EnteredName(name.text))
                         },
                         modifier = Modifier
                             .clip(shape = RoundedCornerShape(3.dp))
-                            .border(BorderStroke(0.8.dp, if (isFocused) Color(0xFF4FBEF0) else Color.Gray))
+                            .border(
+                                BorderStroke(
+                                    0.8.dp,
+                                    if (isFocused) Color(0xFF4FBEF0) else Color.Gray
+                                )
+                            )
                             .onFocusChanged {
                                 isFocused = it.isFocused
                             },
@@ -198,6 +221,9 @@ fun SignUpScreenLoader(navController: NavController) {
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center
                 ) {
+                    var isFocusEmail by remember {
+                        mutableStateOf(false)
+                    }
                     OutlinedTextField(
                         value = email,
                         label = {
@@ -209,21 +235,27 @@ fun SignUpScreenLoader(navController: NavController) {
                         maxLines = 1,
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-                        onValueChange = { input: TextFieldValue ->
-                            val changeValue: String = input.text.ifBlank {
-                                input.text.toString()
-
-                            }
-                            email = input.copy(
-                                text = changeValue,
-                                selection = TextRange(changeValue.length)
+                        onValueChange = {
+//                            val changeValue: String = it.text.ifBlank {
+//                                it.text.toString()
+//
+//                            }
+                            email = it.copy(
+                                text = it.text,
+                                selection = TextRange(it.text.length)
                             )
+                            viewModel.onEvent(UserEvent.EnteredEmail(email.text))
                         },
                         modifier = Modifier
                             .clip(shape = RoundedCornerShape(3.dp))
-                            .border(BorderStroke(0.8.dp, if (isFocused) Color(0xFF4FBEF0) else Color.Gray))
+                            .border(
+                                BorderStroke(
+                                    0.8.dp,
+                                    if (isFocusEmail) Color(0xFF4FBEF0) else Color.Gray
+                                )
+                            )
                             .onFocusChanged {
-                                isFocused = it.isFocused
+                                isFocusEmail = it.isFocused
                             },
                         colors = TextFieldDefaults.colors(
                             focusedTextColor = Color.White,
@@ -254,6 +286,9 @@ fun SignUpScreenLoader(navController: NavController) {
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center
                 ) {
+                    var isFocusPassword by remember {
+                        mutableStateOf(false)
+                    }
                     OutlinedTextField(
                         value = password,
                         label = {
@@ -265,20 +300,26 @@ fun SignUpScreenLoader(navController: NavController) {
                         maxLines = 1,
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                        onValueChange = { input: TextFieldValue ->
-                            val changeValue: String = input.text.ifBlank {
-                                input.text.toString()
-                            }
-                            password = input.copy(
-                                text = changeValue,
-                                selection = TextRange(changeValue.length)
+                        onValueChange = { //input: TextFieldValue ->
+//                            val changeValue: String = it.text.ifBlank {
+//                                it.text.toString()
+//                            }
+                            password = it.copy(
+                                text = it.text,
+                                selection = TextRange(it.text.length)
                             )
+                            viewModel.onEvent(UserEvent.EnteredPassword(password.text))
                         },
                         modifier = Modifier
                             .clip(shape = RoundedCornerShape(3.dp))
-                            .border(BorderStroke(0.8.dp, if (isFocused) Color(0xFF4FBEF0) else Color.Gray))
+                            .border(
+                                BorderStroke(
+                                    0.8.dp,
+                                    if (isFocusPassword) Color(0xFF4FBEF0) else Color.Gray
+                                )
+                            )
                             .onFocusChanged {
-                                isFocused = it.isFocused
+                                isFocusPassword = it.isFocused
                             },
                         colors = TextFieldDefaults.colors(
                             focusedTextColor = Color.White,
@@ -297,7 +338,8 @@ fun SignUpScreenLoader(navController: NavController) {
                                 Icons.Filled.Visibility
                             else Icons.Filled.VisibilityOff
 
-                            val description = if (passwordVisible) "Hide password" else "Show password"
+                            val description =
+                                if (passwordVisible) "Hide password" else "Show password"
                             IconButton(onClick = { passwordVisible = !passwordVisible }) {
                                 Icon(
                                     imageVector = image,
@@ -328,7 +370,88 @@ fun SignUpScreenLoader(navController: NavController) {
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            BirthdayDate()
+
+//            BirthdayDate(
+//                newSelectedDate = selectedDate,
+//                onValueChange = {}
+//            )
+            var showDataDialog by remember { mutableStateOf(false) }
+            val datePickerState = rememberDatePickerState()
+            val focusManager = LocalFocusManager.current
+
+            if (showDataDialog) {
+                DatePickerDialog(
+                    onDismissRequest = { showDataDialog = false },
+                    confirmButton = {
+                        Button(
+                            onClick = {
+                                datePickerState.selectedDateMillis?.let { millis ->
+                                    val formattedDate = millis.toBrazilianDateFormat()
+                                    selectedDate = TextFieldValue(text = formattedDate)
+                                }
+                                showDataDialog = false
+                            }
+                        ) {
+                            Text(text = "Escolher data")
+                        }
+                    }
+                ) {
+                    DatePicker(state = datePickerState)
+                }
+            }
+            var isFocusDate by remember {
+                mutableStateOf(false)
+            }
+            OutlinedTextField(
+                value = selectedDate,
+                label = {
+                    Text(
+                        text = "Data de nascimento",
+                        fontWeight = FontWeight.Light
+                    )
+                },
+
+                maxLines = 1,
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                onValueChange = {
+                    selectedDate = it.copy(
+                        text = it.text,
+                        selection = TextRange(it.text.length)
+                    )
+                },
+                modifier = Modifier
+                    .clip(shape = RoundedCornerShape(3.dp))
+                    .border(
+                        BorderStroke(
+                            0.8.dp,
+                            if (isFocusDate) Color(0xFF4FBEF0) else Color.Gray
+                        )
+                    ).onFocusChanged {
+                        if (it.isFocused) {
+                            showDataDialog = true
+                            focusManager.clearFocus(force = true)
+                        }
+                    },
+
+                colors = TextFieldDefaults.colors(
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.LightGray,
+                    focusedContainerColor = Color.Black,
+                    unfocusedContainerColor = Color.Black,
+                    disabledContainerColor = Color.Black,
+                    cursorColor = Color.White,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    disabledIndicatorColor = Color.Transparent,
+                ),
+                trailingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.DateRange,
+                        contentDescription = "DateButton",
+                    )
+                }
+            )
         }
         Row(
             modifier = Modifier.fillMaxHeight(),
@@ -358,6 +481,13 @@ fun SignUpScreenLoader(navController: NavController) {
                     if (isValidName && isValidEmail && isValidPassword) {
                         validFormNameFlag = false
                         navController.navigate(Screen.Success.route)
+                        viewModel.searchName(name.text)
+                        viewModel.searchEmail(email.text)
+                        Log.d("NAME","value: $name")
+                        Log.d("EMAIL","value: $email")
+                        Log.d("PASSWORD","value: $password")
+                        Log.d("DATE","value: ${selectedDate.text}")
+                        viewModel.onEvent(UserEvent.SaveUser)
                     } else {
                         validFormNameFlag = true
                     }

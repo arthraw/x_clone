@@ -25,10 +25,13 @@ import androidx.navigation.compose.rememberNavController
 import com.project.loginscreen.R
 import com.project.loginscreen.presentation.login.setUpNavHost
 import com.project.loginscreen.presentation.theme.LoginScreenTheme
+import com.project.loginscreen.presentation.user.UserViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class FeedActivity : ComponentActivity() {
+    private lateinit var viewModel: UserViewModel
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -42,7 +45,7 @@ class FeedActivity : ComponentActivity() {
                         color = MaterialTheme.colorScheme.background
                     ) {
                         val navController = rememberNavController()
-                        setUpNavHost(navController = navController)
+                        setUpNavHost(navController = navController, viewModel = viewModel)
                     }
                 }
             }

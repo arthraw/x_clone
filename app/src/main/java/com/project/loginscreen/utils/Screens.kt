@@ -1,4 +1,4 @@
-package com.project.loginscreen.presentation
+package com.project.loginscreen.utils
 
 sealed class Screen(val route: String) {
     object LoginScreen : Screen("login")

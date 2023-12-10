@@ -55,13 +55,17 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.project.loginscreen.R
-import com.project.loginscreen.presentation.Screen
+import com.project.loginscreen.utils.Screen
 import com.project.loginscreen.presentation.components.AlertDialogBox
 import com.project.loginscreen.presentation.theme.LoginScreenTheme
+import com.project.loginscreen.presentation.user.UserEvent
+import com.project.loginscreen.presentation.user.UserViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class PasswordActivity : ComponentActivity() {
+    private lateinit var viewModel: UserViewModel
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -75,7 +79,7 @@ class PasswordActivity : ComponentActivity() {
                         color = MaterialTheme.colorScheme.background
                     ) {
                         val navController = rememberNavController()
-                        setUpNavHost(navController = navController)
+                        setUpNavHost(navController = navController, viewModel = viewModel)
                     }
                 }
             }
@@ -84,7 +88,7 @@ class PasswordActivity : ComponentActivity() {
 
 }
 @Composable
-fun PasswordCheckLoader(navController: NavHostController, name: String?) {
+fun PasswordCheckLoader(navController: NavHostController, name: String?, viewModel: UserViewModel) {
     var text by remember { mutableStateOf(TextFieldValue("")) }
     var isFocused by remember { mutableStateOf(false) }
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
@@ -235,6 +239,8 @@ fun PasswordCheckLoader(navController: NavHostController, name: String?) {
                     if (isValid) {
                         validFormNameFlag = false
                         navController.navigate(Screen.Feed.route)
+                        text = viewModel.userPassword.value
+                        viewModel.onEvent(UserEvent.EnteredPassword(text.text))
                     } else {
                         validFormNameFlag = true
                     }

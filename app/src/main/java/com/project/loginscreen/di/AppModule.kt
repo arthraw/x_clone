@@ -6,7 +6,10 @@ import com.project.loginscreen.data.model.LoginScreenDataBase
 import com.project.loginscreen.data.model.dao.UserDao
 import com.project.loginscreen.data.repository.UserDaoImpl
 import com.project.loginscreen.presentation.user.use_cases.AddUser
+import com.project.loginscreen.presentation.user.use_cases.ComparePass
 import com.project.loginscreen.presentation.user.use_cases.EditUser
+import com.project.loginscreen.presentation.user.use_cases.CompareEmail
+import com.project.loginscreen.presentation.user.use_cases.CompareUser
 import com.project.loginscreen.presentation.user.use_cases.ShowUser
 import com.project.loginscreen.presentation.user.use_cases.UserUseCases
 import dagger.Module
@@ -41,7 +44,10 @@ object AppModule {
         return UserUseCases(
             addUser = AddUser(dao),
             editUser = EditUser(dao),
-            showUser = ShowUser(dao)
+            showUser = ShowUser(dao),
+            compareUser = CompareUser(dao),
+            comparePass = ComparePass(dao),
+            compareEmail = CompareEmail(dao)
         )
     }
 }

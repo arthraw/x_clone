@@ -18,4 +18,16 @@ class UserDaoImpl @Inject constructor(
     override fun updateUser(user: UserEntity): Int {
         return dao.updateUser(user)
     }
+
+    override fun checkUser(name: String) : String {
+        return dao.checkUser(name)
+    }
+
+    override fun checkPass(password: String): String {
+        return dao.checkUser(password)
+    }
+
+    override fun checkEmail(email: String): String {
+        return dao.checkEmail(email)
+    }
 }

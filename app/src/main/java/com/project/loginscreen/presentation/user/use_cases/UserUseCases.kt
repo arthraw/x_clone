@@ -4,5 +4,7 @@ data class UserUseCases(
     val addUser: AddUser,
     val showUser : ShowUser,
     val editUser: EditUser,
-    val searchUser : SearchUser
+    val compareUser : CompareUser,
+    val comparePass : ComparePass,
+    val compareEmail : CompareEmail
 )

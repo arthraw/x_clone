@@ -27,7 +27,7 @@ class UserViewModel @Inject constructor(
 
     private val _userBirthday = mutableStateOf(TextFieldValue(""))
     val userBirthday = _userBirthday
-    fun onEvent(event: UserEvent) {
+    fun onEvent(event: UserEvent)  {
         when (event) {
             is UserEvent.EnteredName -> {
                 _userName.value = userName.value.copy(
@@ -61,7 +61,7 @@ class UserViewModel @Inject constructor(
                                 name = userName.value.text,
                                 email = userEmail.value.text,
                                 password = userPassword.value.text,
-                                birthDate = userBirthday.value.text.toLongOrNull() //TODO: Verify wrong return in my birthday function
+                                birthDate = userBirthday.value.text.toLongOrNull()
                             )
                         )
                     } catch (e: Exception) {
@@ -76,7 +76,7 @@ class UserViewModel @Inject constructor(
 
     fun searchName(name : String) {
         viewModelScope.launch {
-            if (name == useCases.compareUser(userName.value.text)) {
+            if (name == useCases.compareUser(name)) {
                 throw InvalidUserException("User already exists.")
             }
         }
@@ -85,7 +85,7 @@ class UserViewModel @Inject constructor(
 
     fun searchEmail(email : String) {
         viewModelScope.launch {
-            if (email == useCases.compareEmail(userEmail.value.text)) {
+            if (email == useCases.compareEmail(email)) {
                 throw InvalidUserException("Email already exists in another account.")
             }
         }

@@ -132,7 +132,7 @@ fun setUpNavHost(navController: NavHostController, viewModel: UserViewModel) {
             enterTransition = { slideIntoContainer(towards = AnimatedContentTransitionScope.SlideDirection.Start) },
             exitTransition = { slideOutOfContainer(towards = AnimatedContentTransitionScope.SlideDirection.Start) }
         ) {
-            SignUpScreenLoader(navController = navController)
+            SignUpScreenLoader(navController = navController, viewModel = viewModel)
         }
         composable(
             route = Screen.PasswordScreen.route + "/{name}",
@@ -422,7 +422,7 @@ fun loginLabel(
                     )
 //                    text = viewModel.userName.value
 
-//                    viewModel.onEvent(UserEvent.EnteredName(text.text))
+//                    viewModel.onEvent(UserEvent.EnteredName(input.text))
                 },
                 modifier = Modifier
                     .clip(shape = RoundedCornerShape(3.dp))

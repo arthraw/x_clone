@@ -175,7 +175,6 @@ fun PasswordCheckLoader(navController: NavHostController, name: String?, viewMod
                                 text = changeValue,
                                 selection = TextRange(changeValue.length)
                             )
-                            viewModel.onEvent(UserEvent.EnteredName(text.text))
                         },
                         modifier = Modifier
                             .clip(shape = RoundedCornerShape(3.dp))
@@ -239,8 +238,9 @@ fun PasswordCheckLoader(navController: NavHostController, name: String?, viewMod
 
                     if (isValid) {
                         validFormNameFlag = false
-                        text = viewModel.userPassword.value
                         navController.navigate(Screen.Feed.route)
+                        text = viewModel.userPassword.value
+                        viewModel.onEvent(UserEvent.EnteredPassword(text.text))
                     } else {
                         validFormNameFlag = true
                     }

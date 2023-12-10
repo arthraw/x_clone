@@ -1,10 +1,7 @@
 package com.project.loginscreen.data.repository
 
-import androidx.lifecycle.LiveData
 import com.project.loginscreen.data.model.dao.UserDao
 import com.project.loginscreen.data.model.entities.UserEntity
-import kotlinx.coroutines.Dispatchers.IO
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class UserDaoImpl @Inject constructor(
@@ -24,5 +21,13 @@ class UserDaoImpl @Inject constructor(
 
     override fun checkUser(name: String) : String {
         return dao.checkUser(name)
+    }
+
+    override fun checkPass(password: String): String {
+        return dao.checkUser(password)
+    }
+
+    override fun checkEmail(email: String): String {
+        return dao.checkEmail(email)
     }
 }

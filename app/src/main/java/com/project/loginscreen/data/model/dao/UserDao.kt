@@ -17,5 +17,9 @@ interface UserDao {
     fun updateUser(user : UserEntity) : Int
     @Query("SELECT name FROM UserEntity WHERE name = :name")
     fun checkUser(name: String) : String
+    @Query("SELECT password FROM UserEntity WHERE password = :password")
+    fun checkPass(password: String) : String
+    @Query("SELECT email FROM UserEntity WHERE email = :email")
+    fun checkEmail(email: String) : String
 
 }

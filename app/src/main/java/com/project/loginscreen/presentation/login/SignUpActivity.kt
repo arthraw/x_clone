@@ -20,8 +20,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.Button
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -42,6 +46,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
@@ -50,12 +55,14 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.LifecycleCoroutineScope
+import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.project.loginscreen.R
 import com.project.loginscreen.utils.Screen
 import com.project.loginscreen.presentation.components.AlertDialogBox
-import com.project.loginscreen.presentation.components.BirthdayDate
 import com.project.loginscreen.presentation.components.BirthdayText
 import com.project.loginscreen.presentation.components.toBrazilianDateFormat
 import com.project.loginscreen.presentation.theme.LoginScreenTheme
@@ -83,6 +90,7 @@ class SignUpActivity : ComponentActivity() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SignUpScreenLoader(navController: NavController, viewModel: UserViewModel) {
 
@@ -95,7 +103,7 @@ fun SignUpScreenLoader(navController: NavController, viewModel: UserViewModel) {
     var isValidEmail by remember { mutableStateOf(false) }
     var isValidPassword by remember { mutableStateOf(false) }
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
-    var selectedDate by remember { mutableStateOf(TextFieldValue()) }
+    var selectedDate by remember { mutableStateOf(TextFieldValue("")) }
 
 
     Column(
@@ -363,9 +371,86 @@ fun SignUpScreenLoader(navController: NavController, viewModel: UserViewModel) {
             verticalAlignment = Alignment.CenterVertically
         ) {
 
-            BirthdayDate(
-                newSelectedDate = selectedDate,
-                onValueChange = {}
+//            BirthdayDate(
+//                newSelectedDate = selectedDate,
+//                onValueChange = {}
+//            )
+            var showDataDialog by remember { mutableStateOf(false) }
+            val datePickerState = rememberDatePickerState()
+            val focusManager = LocalFocusManager.current
+
+            if (showDataDialog) {
+                DatePickerDialog(
+                    onDismissRequest = { showDataDialog = false },
+                    confirmButton = {
+                        Button(
+                            onClick = {
+                                datePickerState.selectedDateMillis?.let { millis ->
+                                    val formattedDate = millis.toBrazilianDateFormat()
+                                    selectedDate = TextFieldValue(text = formattedDate)
+                                }
+                                showDataDialog = false
+                            }
+                        ) {
+                            Text(text = "Escolher data")
+                        }
+                    }
+                ) {
+                    DatePicker(state = datePickerState)
+                }
+            }
+            var isFocusDate by remember {
+                mutableStateOf(false)
+            }
+            OutlinedTextField(
+                value = selectedDate,
+                label = {
+                    Text(
+                        text = "Data de nascimento",
+                        fontWeight = FontWeight.Light
+                    )
+                },
+
+                maxLines = 1,
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                onValueChange = {
+                    selectedDate = it.copy(
+                        text = it.text,
+                        selection = TextRange(it.text.length)
+                    )
+                },
+                modifier = Modifier
+                    .clip(shape = RoundedCornerShape(3.dp))
+                    .border(
+                        BorderStroke(
+                            0.8.dp,
+                            if (isFocusDate) Color(0xFF4FBEF0) else Color.Gray
+                        )
+                    ).onFocusChanged {
+                        if (it.isFocused) {
+                            showDataDialog = true
+                            focusManager.clearFocus(force = true)
+                        }
+                    },
+
+                colors = TextFieldDefaults.colors(
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.LightGray,
+                    focusedContainerColor = Color.Black,
+                    unfocusedContainerColor = Color.Black,
+                    disabledContainerColor = Color.Black,
+                    cursorColor = Color.White,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    disabledIndicatorColor = Color.Transparent,
+                ),
+                trailingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.DateRange,
+                        contentDescription = "DateButton",
+                    )
+                }
             )
         }
         Row(
@@ -396,6 +481,12 @@ fun SignUpScreenLoader(navController: NavController, viewModel: UserViewModel) {
                     if (isValidName && isValidEmail && isValidPassword) {
                         validFormNameFlag = false
                         navController.navigate(Screen.Success.route)
+                        viewModel.searchName(name.text)
+                        viewModel.searchEmail(email.text)
+                        Log.d("NAME","value: $name")
+                        Log.d("EMAIL","value: $email")
+                        Log.d("PASSWORD","value: $password")
+                        Log.d("DATE","value: ${selectedDate.text}")
                         viewModel.onEvent(UserEvent.SaveUser)
                     } else {
                         validFormNameFlag = true

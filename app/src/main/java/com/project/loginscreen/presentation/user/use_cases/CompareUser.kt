@@ -5,7 +5,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-class SearchUser @Inject constructor(
+class CompareUser @Inject constructor(
     private val dao: UserDao
 ) {
 

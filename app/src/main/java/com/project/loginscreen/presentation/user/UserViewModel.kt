@@ -1,14 +1,18 @@
 package com.project.loginscreen.presentation.user
 
+import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
-import com.project.loginscreen.data.model.entities.InvalidUserException
 import com.project.loginscreen.data.model.entities.UserEntity
+import com.project.loginscreen.presentation.user.use_cases.ListUsers
 import com.project.loginscreen.presentation.user.use_cases.UserUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
@@ -27,7 +31,7 @@ class UserViewModel @Inject constructor(
 
     private val _userBirthday = mutableStateOf(TextFieldValue(""))
     val userBirthday = _userBirthday
-    fun onEvent(event: UserEvent)  {
+    fun onEvent(event: UserEvent) {
         when (event) {
             is UserEvent.EnteredName -> {
                 _userName.value = userName.value.copy(
@@ -51,6 +55,13 @@ class UserViewModel @Inject constructor(
                 _userBirthday.value = userBirthday.value.copy(
                     text = event.value
                 )
+                val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                try {
+                    val date = dateFormat.parse(event.value)
+                    date?.time ?: 0L
+                } catch (e: Exception) {
+                    0L
+                }
             }
 
             is UserEvent.SaveUser -> {
@@ -61,7 +72,7 @@ class UserViewModel @Inject constructor(
                                 name = userName.value.text,
                                 email = userEmail.value.text,
                                 password = userPassword.value.text,
-                                birthDate = userBirthday.value.text.toLongOrNull()
+                                birthDate = userBirthday.value.text.toLong()
                             )
                         )
                     } catch (e: Exception) {
@@ -71,31 +82,41 @@ class UserViewModel @Inject constructor(
                 }
             }
 
+            else -> {}
+        }
+    }
+    fun showAllUsers() {
+        viewModelScope.launch {
+            val users =  useCases.listUsers()
+            Log.d("USERS","${users.forEach { it.email }}")
+            for (user in users) {
+                println("ID: ${user.userId}, User: ${user.name}, Email: ${user.email}, Password: ${user.password}, Birth Day: ${user.birthDate}")
+            }
         }
     }
 
-    fun searchName(name : String) {
+    fun searchName(name: String) {
         viewModelScope.launch {
-            if (name == useCases.compareUser(name)) {
-                throw InvalidUserException("User already exists.")
+            if (useCases.compareUser(name) != null) {
+                throw Exception("Nome ja existe")
             }
         }
         return
     }
 
-    fun searchEmail(email : String) {
+    fun searchEmail(email: String) {
         viewModelScope.launch {
-            if (email == useCases.compareEmail(email)) {
-                throw InvalidUserException("Email already exists in another account.")
+            if (useCases.compareEmail(email) != null) {
+                throw Exception("Email ja existe")
             }
         }
         return
     }
 
-    fun searchPass(password : String) {
+    fun searchPass(password: String) {
         viewModelScope.launch {
-            if (password == useCases.comparePass(userPassword.value.text)) {
-                throw InvalidUserException("User already exists.")
+            if (useCases.comparePass(password) != null) {
+                throw Exception("Senha nao confere")
             }
         }
         return

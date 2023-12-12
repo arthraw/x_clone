@@ -8,7 +8,7 @@ import javax.inject.Inject
 class CompareEmail @Inject constructor(
     private val dao: UserDao
 ) {
-    suspend operator fun invoke(email: String) : String = withContext(Dispatchers.IO){
+    suspend operator fun invoke(email: String) : String? = withContext(Dispatchers.IO){
         return@withContext dao.checkEmail(email)
     }
 }

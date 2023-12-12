@@ -8,7 +8,7 @@ import javax.inject.Inject
 class ComparePass @Inject constructor(
     private val dao: UserDao
 ) {
-    suspend operator fun invoke(password: String): String = withContext(Dispatchers.IO) {
+    suspend operator fun invoke(password: String): String? = withContext(Dispatchers.IO) {
         return@withContext dao.checkPass(password)
     }
 }

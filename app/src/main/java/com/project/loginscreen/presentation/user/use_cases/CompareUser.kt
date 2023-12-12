@@ -9,7 +9,7 @@ class CompareUser @Inject constructor(
     private val dao: UserDao
 ) {
 
-    suspend operator fun invoke(name : String) : String = withContext(Dispatchers.IO) {
+    suspend operator fun invoke(name : String) : String? = withContext(Dispatchers.IO) {
         return@withContext dao.checkUser(name)
     }
 }

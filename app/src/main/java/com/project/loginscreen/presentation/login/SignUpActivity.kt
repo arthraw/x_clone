@@ -61,6 +61,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.project.loginscreen.R
+import com.project.loginscreen.data.model.entities.InvalidUserException
 import com.project.loginscreen.utils.Screen
 import com.project.loginscreen.presentation.components.AlertDialogBox
 import com.project.loginscreen.presentation.components.BirthdayText
@@ -69,6 +70,8 @@ import com.project.loginscreen.presentation.theme.LoginScreenTheme
 import com.project.loginscreen.presentation.user.UserEvent
 import com.project.loginscreen.presentation.user.UserViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 @AndroidEntryPoint
 class SignUpActivity : ComponentActivity() {
@@ -416,9 +419,9 @@ fun SignUpScreenLoader(navController: NavController, viewModel: UserViewModel) {
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 onValueChange = {
                     selectedDate = it.copy(
-                        text = it.text,
-                        selection = TextRange(it.text.length)
+                        text = it.text
                     )
+                    viewModel.onEvent(UserEvent.EnteredBirthday(selectedDate.text))
                 },
                 modifier = Modifier
                     .clip(shape = RoundedCornerShape(3.dp))
@@ -471,7 +474,8 @@ fun SignUpScreenLoader(navController: NavController, viewModel: UserViewModel) {
                 accountMessage = "Já tem uma conta?",
                 entry = "Faça login",
                 createAccount = {
-                    navController.navigate(Screen.LoginScreen.route)
+//                    navController.navigate(Screen.LoginScreen.route)
+                    viewModel.showAllUsers()
                 },
                 toFeed = {
                     isValidName = name.text.isNotEmpty()
@@ -481,13 +485,18 @@ fun SignUpScreenLoader(navController: NavController, viewModel: UserViewModel) {
                     if (isValidName && isValidEmail && isValidPassword) {
                         validFormNameFlag = false
                         navController.navigate(Screen.Success.route)
-                        viewModel.searchName(name.text)
-                        viewModel.searchEmail(email.text)
                         Log.d("NAME","value: $name")
                         Log.d("EMAIL","value: $email")
                         Log.d("PASSWORD","value: $password")
                         Log.d("DATE","value: ${selectedDate.text}")
+                        try {
+                            viewModel.searchName(name.text)
+                            viewModel.searchEmail(email.text)
+                        } catch (e : Exception) {
+                            throw InvalidUserException("deu nao pai")
+                        }
                         viewModel.onEvent(UserEvent.SaveUser)
+
                     } else {
                         validFormNameFlag = true
                     }

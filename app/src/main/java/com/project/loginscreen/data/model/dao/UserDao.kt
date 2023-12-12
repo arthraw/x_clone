@@ -9,6 +9,8 @@ import com.project.loginscreen.data.model.entities.UserEntity
 
 @Dao
 interface UserDao {
+    @Query("SELECT * FROM UserEntity")
+    fun selectUsers() : List<UserEntity>
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun createUser(user : UserEntity)
     @Query("SELECT * FROM UserEntity WHERE user_id = :id" )
@@ -16,10 +18,10 @@ interface UserDao {
     @Update
     fun updateUser(user : UserEntity) : Int
     @Query("SELECT name FROM UserEntity WHERE name = :name")
-    fun checkUser(name: String) : String
+    fun checkUser(name: String) : String?
     @Query("SELECT password FROM UserEntity WHERE password = :password")
-    fun checkPass(password: String) : String
+    fun checkPass(password: String) : String?
     @Query("SELECT email FROM UserEntity WHERE email = :email")
-    fun checkEmail(email: String) : String
+    fun checkEmail(email: String) : String?
 
 }

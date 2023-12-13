@@ -28,8 +28,8 @@ class UserDaoImpl @Inject constructor(
         return dao.checkUser(name)
     }
 
-    override fun checkPass(password: String): String? {
-        return dao.checkUser(password)
+    override fun checkPass(name: String, password: String): LiveData<Map<String,String>> {
+        return dao.checkPass(name, password)
     }
 
     override fun checkEmail(email: String): String? {

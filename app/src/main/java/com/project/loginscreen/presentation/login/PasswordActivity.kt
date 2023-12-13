@@ -167,14 +167,12 @@ fun PasswordCheckLoader(navController: NavHostController, name: String?, viewMod
                         maxLines = 1,
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                        onValueChange = { input: TextFieldValue ->
-                            val changeValue: String = input.text.ifBlank {
-                                input.text.toString()
-                            }
-                            text = input.copy(
-                                text = changeValue,
-                                selection = TextRange(changeValue.length)
+                        onValueChange = {
+                            text = it.copy(
+                                text = it.text,
+                                selection = TextRange(it.text.length)
                             )
+                            viewModel.onEvent(UserEvent.EnteredPassword(text.text))
                         },
                         modifier = Modifier
                             .clip(shape = RoundedCornerShape(3.dp))
@@ -238,9 +236,8 @@ fun PasswordCheckLoader(navController: NavHostController, name: String?, viewMod
 
                     if (isValid) {
                         validFormNameFlag = false
+                        viewModel.searchPass(name.toString(),text.text)
                         navController.navigate(Screen.Feed.route)
-                        text = viewModel.userPassword.value
-                        viewModel.onEvent(UserEvent.EnteredPassword(text.text))
                     } else {
                         validFormNameFlag = true
                     }
@@ -278,17 +275,10 @@ fun blockLabelName(
                 maxLines = 1,
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-                onValueChange = { input: TextFieldValue ->
-                    val changeValue: String = input.text.ifBlank {
-                        val toast =
-                            Toast.makeText(context, "Conta nao encontrada", Toast.LENGTH_SHORT)
-                        toast.show()
-                        input.text.toString()
-
-                    }
-                    text = input.copy(
-                        text = changeValue,
-                        selection = TextRange(changeValue.length)
+                onValueChange = {
+                    text = it.copy(
+                        text = it.text,
+                        selection = TextRange(it.text.length)
                     )
                 },
                 enabled = false,

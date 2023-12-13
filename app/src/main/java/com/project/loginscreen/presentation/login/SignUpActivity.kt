@@ -174,14 +174,11 @@ fun SignUpScreenLoader(navController: NavController, viewModel: UserViewModel) {
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                         onValueChange = {
-//                            val changeValue: String = it.text.ifBlank {
-//                                it.text.toString()
-//
-//                            }
                             name = it.copy(
                                 text = it.text,
                                 selection = TextRange(it.text.length)
                             )
+                            viewModel.searchName(name.text)
                             viewModel.onEvent(UserEvent.EnteredName(name.text))
                         },
                         modifier = Modifier
@@ -239,14 +236,11 @@ fun SignUpScreenLoader(navController: NavController, viewModel: UserViewModel) {
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                         onValueChange = {
-//                            val changeValue: String = it.text.ifBlank {
-//                                it.text.toString()
-//
-//                            }
                             email = it.copy(
                                 text = it.text,
                                 selection = TextRange(it.text.length)
                             )
+                            viewModel.searchEmail(email.text)
                             viewModel.onEvent(UserEvent.EnteredEmail(email.text))
                         },
                         modifier = Modifier
@@ -303,10 +297,7 @@ fun SignUpScreenLoader(navController: NavController, viewModel: UserViewModel) {
                         maxLines = 1,
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                        onValueChange = { //input: TextFieldValue ->
-//                            val changeValue: String = it.text.ifBlank {
-//                                it.text.toString()
-//                            }
+                        onValueChange = {
                             password = it.copy(
                                 text = it.text,
                                 selection = TextRange(it.text.length)
@@ -374,10 +365,6 @@ fun SignUpScreenLoader(navController: NavController, viewModel: UserViewModel) {
             verticalAlignment = Alignment.CenterVertically
         ) {
 
-//            BirthdayDate(
-//                newSelectedDate = selectedDate,
-//                onValueChange = {}
-//            )
             var showDataDialog by remember { mutableStateOf(false) }
             val datePickerState = rememberDatePickerState()
             val focusManager = LocalFocusManager.current
@@ -391,6 +378,7 @@ fun SignUpScreenLoader(navController: NavController, viewModel: UserViewModel) {
                                 datePickerState.selectedDateMillis?.let { millis ->
                                     val formattedDate = millis.toBrazilianDateFormat()
                                     selectedDate = TextFieldValue(text = formattedDate)
+                                    viewModel.onEvent(UserEvent.EnteredBirthday(selectedDate.text.replace("/","")))
                                 }
                                 showDataDialog = false
                             }
@@ -413,7 +401,6 @@ fun SignUpScreenLoader(navController: NavController, viewModel: UserViewModel) {
                         fontWeight = FontWeight.Light
                     )
                 },
-
                 maxLines = 1,
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -421,7 +408,6 @@ fun SignUpScreenLoader(navController: NavController, viewModel: UserViewModel) {
                     selectedDate = it.copy(
                         text = it.text
                     )
-                    viewModel.onEvent(UserEvent.EnteredBirthday(selectedDate.text))
                 },
                 modifier = Modifier
                     .clip(shape = RoundedCornerShape(3.dp))
@@ -474,8 +460,7 @@ fun SignUpScreenLoader(navController: NavController, viewModel: UserViewModel) {
                 accountMessage = "Já tem uma conta?",
                 entry = "Faça login",
                 createAccount = {
-//                    navController.navigate(Screen.LoginScreen.route)
-                    viewModel.showAllUsers()
+                    navController.navigate(Screen.LoginScreen.route)
                 },
                 toFeed = {
                     isValidName = name.text.isNotEmpty()
@@ -489,12 +474,7 @@ fun SignUpScreenLoader(navController: NavController, viewModel: UserViewModel) {
                         Log.d("EMAIL","value: $email")
                         Log.d("PASSWORD","value: $password")
                         Log.d("DATE","value: ${selectedDate.text}")
-                        try {
-                            viewModel.searchName(name.text)
-                            viewModel.searchEmail(email.text)
-                        } catch (e : Exception) {
-                            throw InvalidUserException("deu nao pai")
-                        }
+
                         viewModel.onEvent(UserEvent.SaveUser)
 
                     } else {

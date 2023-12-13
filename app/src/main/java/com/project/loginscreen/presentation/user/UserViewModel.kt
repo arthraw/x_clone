@@ -31,6 +31,7 @@ class UserViewModel @Inject constructor(
 
     private val _userBirthday = mutableStateOf(TextFieldValue(""))
     val userBirthday = _userBirthday
+
     fun onEvent(event: UserEvent) {
         when (event) {
             is UserEvent.EnteredName -> {
@@ -55,13 +56,7 @@ class UserViewModel @Inject constructor(
                 _userBirthday.value = userBirthday.value.copy(
                     text = event.value
                 )
-                val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-                try {
-                    val date = dateFormat.parse(event.value)
-                    date?.time ?: 0L
-                } catch (e: Exception) {
-                    0L
-                }
+                userBirthday.value.text.replace("/","")
             }
 
             is UserEvent.SaveUser -> {
@@ -88,7 +83,6 @@ class UserViewModel @Inject constructor(
     fun showAllUsers() {
         viewModelScope.launch {
             val users =  useCases.listUsers()
-            Log.d("USERS","${users.forEach { it.email }}")
             for (user in users) {
                 println("ID: ${user.userId}, User: ${user.name}, Email: ${user.email}, Password: ${user.password}, Birth Day: ${user.birthDate}")
             }
@@ -104,18 +98,30 @@ class UserViewModel @Inject constructor(
         return
     }
 
+    fun searchUserExists(name: String) : String {
+        viewModelScope.launch {
+            if (useCases.compareUser(name) == null) {
+                throw Exception("Usuario nao existe")
+            }
+        }
+        return name
+    }
+
     fun searchEmail(email: String) {
         viewModelScope.launch {
             if (useCases.compareEmail(email) != null) {
+                println(useCases.compareEmail(email))
                 throw Exception("Email ja existe")
             }
         }
         return
     }
 
-    fun searchPass(password: String) {
+    fun searchPass(name: String, password: String) {
         viewModelScope.launch {
-            if (useCases.comparePass(password) != null) {
+            useCases.comparePass(name, password)
+            if (userPassword.value.text != password) {
+                Log.d("TESTE","senha ${userPassword.value.text} nao confere")
                 throw Exception("Senha nao confere")
             }
         }

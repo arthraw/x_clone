@@ -70,6 +70,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.project.loginscreen.R
+import com.project.loginscreen.data.model.entities.InvalidUserException
 import com.project.loginscreen.utils.Screen
 import com.project.loginscreen.presentation.components.AlertDialogBox
 import com.project.loginscreen.presentation.components.RegisterConfirmation
@@ -329,7 +330,7 @@ private fun socialMediaLogin(
         ) {
             Spacer(modifier = Modifier.padding(10.dp))
             Button(
-                onClick = { /*TODO*/ },
+                onClick = {  },
                 modifier = modifier,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFFFFFFFF),
@@ -414,15 +415,12 @@ fun loginLabel(
                             Toast.makeText(context, "Conta nao encontrada", Toast.LENGTH_SHORT)
                         toast.show()
                         input.text.toString()
-
                     }
                     text = input.copy(
                         text = changeValue,
                         selection = TextRange(changeValue.length)
                     )
-//                    text = viewModel.userName.value
-
-//                    viewModel.onEvent(UserEvent.EnteredName(input.text))
+                    viewModel.onEvent(UserEvent.EnteredName(text.text))
                 },
                 modifier = Modifier
                     .clip(shape = RoundedCornerShape(3.dp))
@@ -471,9 +469,8 @@ fun loginLabel(
                         isValid = text.text.isNotEmpty()
                         if (isValid) {
                             validFormNameFlag = false
+                            viewModel.searchUserExists(text.text)
                             navController.navigate(Screen.PasswordScreen.withArgs(text.text))
-                            text = viewModel.userName.value
-                            viewModel.onEvent(UserEvent.EnteredName(text.text))
                         }
                         else {
                             validFormNameFlag = true
@@ -537,7 +534,7 @@ fun bottomContent(
                 horizontalArrangement = Arrangement.Center
             ) {
                 Button(
-                    onClick = { /*TODO*/ },
+                    onClick = {  },
                     modifier = Modifier
                         .height(40.dp)
                         .border(

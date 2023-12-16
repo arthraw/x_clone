@@ -10,7 +10,7 @@ import javax.inject.Inject
 class ComparePass @Inject constructor(
     private val dao: UserDao
 ) {
-    suspend operator fun invoke(name :String, password: String): LiveData<Map<String,String>> = withContext(Dispatchers.IO) {
+    suspend operator fun invoke(name :String, password: String): UserEntity? = withContext(Dispatchers.IO) {
         return@withContext dao.checkPass(name, password)
     }
 }

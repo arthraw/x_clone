@@ -19,12 +19,11 @@ interface UserDao {
     fun readUser(id: Long) : List<UserEntity>
     @Update
     fun updateUser(user : UserEntity) : Int
-    @Query("SELECT name FROM UserEntity WHERE name = :name")
-    fun checkUser(name: String) : String?
-    @MapInfo(keyColumn = "name", valueColumn = "password")
-    @Query("SELECT name,password FROM UserEntity WHERE name = :name AND password = :password")
-    fun checkPass(name: String, password: String) : LiveData<Map<String,String>>
-    @Query("SELECT email FROM UserEntity WHERE email = :email")
-    fun checkEmail(email: String) : String?
+    @Query("SELECT * FROM UserEntity WHERE name = :name")
+    fun checkUser(name: String) : UserEntity?
+    @Query("SELECT * FROM UserEntity WHERE name = :name AND password = :password")
+    fun checkPass(name: String, password: String) : UserEntity?
+    @Query("SELECT * FROM UserEntity WHERE email = :email")
+    fun checkEmail(email: String) : UserEntity?
 
 }

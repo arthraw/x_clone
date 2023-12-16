@@ -24,15 +24,15 @@ class UserDaoImpl @Inject constructor(
         return dao.updateUser(user)
     }
 
-    override fun checkUser(name: String) : String? {
+    override fun checkUser(name: String) : UserEntity? {
         return dao.checkUser(name)
     }
 
-    override fun checkPass(name: String, password: String): LiveData<Map<String,String>> {
+    override fun checkPass(name: String, password: String): UserEntity? {
         return dao.checkPass(name, password)
     }
 
-    override fun checkEmail(email: String): String? {
+    override fun checkEmail(email: String): UserEntity? {
         return dao.checkEmail(email)
     }
 }

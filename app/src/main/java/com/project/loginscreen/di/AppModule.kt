@@ -10,6 +10,7 @@ import com.project.loginscreen.presentation.user.use_cases.ComparePass
 import com.project.loginscreen.presentation.user.use_cases.EditUser
 import com.project.loginscreen.presentation.user.use_cases.CompareEmail
 import com.project.loginscreen.presentation.user.use_cases.CompareUser
+import com.project.loginscreen.presentation.user.use_cases.ListUsers
 import com.project.loginscreen.presentation.user.use_cases.ShowUser
 import com.project.loginscreen.presentation.user.use_cases.UserUseCases
 import dagger.Module
@@ -47,7 +48,8 @@ object AppModule {
             showUser = ShowUser(dao),
             compareUser = CompareUser(dao),
             comparePass = ComparePass(dao),
-            compareEmail = CompareEmail(dao)
+            compareEmail = CompareEmail(dao),
+            listUsers = ListUsers(dao)
         )
     }
 }

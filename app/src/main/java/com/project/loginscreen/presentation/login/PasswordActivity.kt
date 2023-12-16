@@ -29,10 +29,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -87,6 +91,7 @@ class PasswordActivity : ComponentActivity() {
     }
 
 }
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun PasswordCheckLoader(navController: NavHostController, name: String?, viewModel: UserViewModel) {
     var text by remember { mutableStateOf(TextFieldValue("")) }
@@ -94,158 +99,185 @@ fun PasswordCheckLoader(navController: NavHostController, name: String?, viewMod
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
     var isValid by remember { mutableStateOf(false) }
     var validFormNameFlag by remember { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
+    var eventKey by remember { mutableStateOf(false) }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFF000000)),
-        verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.CenterHorizontally
+    Scaffold (
+        modifier = Modifier.background(color = Color.Transparent),
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState)
+        },
+        contentColor = Color.Transparent,
+        containerColor = Color.Transparent
     ) {
-        if (validFormNameFlag) {
-            AlertDialogBox(
-                text = "Por favor insira uma senha valida.",
-                openDialog = validFormNameFlag,
-                onDismiss = {
-                    validFormNameFlag = false
-                }
-            )
-        }
-        Row(
-            verticalAlignment = Alignment.Top,
-            horizontalArrangement = Arrangement.Center
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color(0xFF000000)),
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.padding(top = 10.dp))
-
-            Image(
-                painter = painterResource(R.drawable.x_logo),
-                contentDescription = "X social media Logo",
-                modifier = Modifier
-                    .size(70.dp)
-                    .padding(top = 30.dp),
-            )
-        }
-        Spacer(modifier = Modifier.padding(10.dp))
-        Row {
-            welcomeText(
-                text = "Digite sua senha",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 30.dp),
-            )
-        }
-        Spacer(modifier = Modifier.padding(10.dp))
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ) {
-            blockLabelName(
-                label = name.toString()
-            )
-        }
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Start
-        ) {
-            Column(
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
+            if (validFormNameFlag) {
+                AlertDialogBox(
+                    text = "Por favor insira uma senha valida.",
+                    openDialog = validFormNameFlag,
+                    onDismiss = {
+                        validFormNameFlag = false
+                    }
+                )
+            }
+            Row(
+                verticalAlignment = Alignment.Top,
+                horizontalArrangement = Arrangement.Center
             ) {
-                Spacer(modifier = Modifier.padding(5.dp))
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    OutlinedTextField(
-                        value = text,
-                        label = {
-                            Text(
-                                text = "Senha",
-                                fontWeight = FontWeight.Light
-                            )
-                        },
-                        maxLines = 1,
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                        onValueChange = { input: TextFieldValue ->
-                            val changeValue: String = input.text.ifBlank {
-                                input.text.toString()
-                            }
-                            text = input.copy(
-                                text = changeValue,
-                                selection = TextRange(changeValue.length)
-                            )
-                        },
-                        modifier = Modifier
-                            .clip(shape = RoundedCornerShape(3.dp))
-                            .border(
-                                BorderStroke(
-                                    0.8.dp,
-                                    if (isFocused) Color(0xFF4FBEF0) else Color.Gray
-                                )
-                            )
-                            .onFocusChanged {
-                                isFocused = it.isFocused
-                            },
-                        colors = TextFieldDefaults.colors(
-                            focusedTextColor = Color.White,
-                            unfocusedTextColor = Color.LightGray,
-                            focusedContainerColor = Color.Black,
-                            unfocusedContainerColor = Color.Black,
-                            disabledContainerColor = Color.Black,
-                            cursorColor = Color.White,
-                            focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent,
-                            disabledIndicatorColor = Color.Transparent,
-                        ),
-                        visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                        trailingIcon = {
-                            val image = if (passwordVisible)
-                                Icons.Filled.Visibility
-                            else Icons.Filled.VisibilityOff
+                Spacer(modifier = Modifier.padding(top = 10.dp))
 
-                            val description = if (passwordVisible) "Hide password" else "Show password"
-                            IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                                Icon(
-                                    imageVector = image,
-                                    contentDescription = description,
+                Image(
+                    painter = painterResource(R.drawable.x_logo),
+                    contentDescription = "X social media Logo",
+                    modifier = Modifier
+                        .size(70.dp)
+                        .padding(top = 30.dp),
+                )
+            }
+            Spacer(modifier = Modifier.padding(10.dp))
+            Row {
+                welcomeText(
+                    text = "Digite sua senha",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 30.dp),
+                )
+            }
+            Spacer(modifier = Modifier.padding(10.dp))
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                blockLabelName(
+                    label = name.toString()
+                )
+            }
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Start
+            ) {
+                Column(
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Spacer(modifier = Modifier.padding(5.dp))
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        OutlinedTextField(
+                            value = text,
+                            label = {
+                                Text(
+                                    text = "Senha",
+                                    fontWeight = FontWeight.Light
                                 )
+                            },
+                            maxLines = 1,
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                            onValueChange = {
+                                text = it.copy(
+                                    text = it.text,
+                                    selection = TextRange(it.text.length)
+                                )
+                                viewModel.onEvent(UserEvent.EnteredPassword(text.text))
+                            },
+                            modifier = Modifier
+                                .clip(shape = RoundedCornerShape(3.dp))
+                                .border(
+                                    BorderStroke(
+                                        0.8.dp,
+                                        if (isFocused) Color(0xFF4FBEF0) else Color.Gray
+                                    )
+                                )
+                                .onFocusChanged {
+                                    isFocused = it.isFocused
+                                },
+                            colors = TextFieldDefaults.colors(
+                                focusedTextColor = Color.White,
+                                unfocusedTextColor = Color.LightGray,
+                                focusedContainerColor = Color.Black,
+                                unfocusedContainerColor = Color.Black,
+                                disabledContainerColor = Color.Black,
+                                cursorColor = Color.White,
+                                focusedIndicatorColor = Color.Transparent,
+                                unfocusedIndicatorColor = Color.Transparent,
+                                disabledIndicatorColor = Color.Transparent,
+                            ),
+                            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                            trailingIcon = {
+                                val image = if (passwordVisible)
+                                    Icons.Filled.Visibility
+                                else Icons.Filled.VisibilityOff
+
+                                val description = if (passwordVisible) "Hide password" else "Show password"
+                                IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                                    Icon(
+                                        imageVector = image,
+                                        contentDescription = description,
+                                    )
+                                }
                             }
-                        }
-                    )
+                        )
+                    }
                 }
             }
-        }
-        Row(
-            verticalAlignment = Alignment.Bottom,
-            horizontalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxHeight()
-        ) {
-            bottomContent(
-                modifier = Modifier
-                    .padding(40.dp),
-                text = "Entrar",
-                showPassButton = false,
-                showNextButton = true,
-                accountMessage = "Não tem uma conta?",
-                entry = "Inscreva-se",
-                showText = true,
-                createAccount = {
-                    navController.navigate(Screen.SignUpScreen.route)
-                },
-                toFeed = {
-                    isValid = text.text.isNotEmpty()
-
-                    if (isValid) {
-                        validFormNameFlag = false
-                        navController.navigate(Screen.Feed.route)
-                        text = viewModel.userPassword.value
-                        viewModel.onEvent(UserEvent.EnteredPassword(text.text))
-                    } else {
-                        validFormNameFlag = true
+            Row(
+                verticalAlignment = Alignment.Bottom,
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxHeight()
+            ) {
+                bottomContent(
+                    modifier = Modifier
+                        .padding(40.dp),
+                    text = "Entrar",
+                    showPassButton = false,
+                    showNextButton = true,
+                    accountMessage = "Não tem uma conta?",
+                    entry = "Inscreva-se",
+                    showText = true,
+                    createAccount = {
+                        navController.navigate(Screen.SignUpScreen.route)
+                    },
+                    toFeed = {
+                        isValid = text.text.isNotEmpty()
+                        if (isValid) {
+                            validFormNameFlag = false
+                            eventKey = true
+                            viewModel.searchPass(name.toString(),text.text)
+                        } else {
+                            validFormNameFlag = true
+                        }
+                    },
+                )
+                LaunchedEffect(key1 = viewModel) {
+                    viewModel.eventFlow.collect { event ->
+                        when(event) {
+                            is UserViewModel.UiEvent.ShowMessage -> {
+                                if (event.key) {
+                                    snackbarHostState.showSnackbar(
+                                        message = event.message
+                                    )
+                                }
+                            }
+                            is UserViewModel.UiEvent.SaveUser -> {
+                                if (eventKey) {
+                                    eventKey = false
+                                    navController.navigate(Screen.Feed.route)
+                                }
+                            }
+                            else -> { eventKey = false }
+                        }
                     }
-                },
-            )
+                }
+            }
         }
     }
 }
@@ -278,17 +310,10 @@ fun blockLabelName(
                 maxLines = 1,
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-                onValueChange = { input: TextFieldValue ->
-                    val changeValue: String = input.text.ifBlank {
-                        val toast =
-                            Toast.makeText(context, "Conta nao encontrada", Toast.LENGTH_SHORT)
-                        toast.show()
-                        input.text.toString()
-
-                    }
-                    text = input.copy(
-                        text = changeValue,
-                        selection = TextRange(changeValue.length)
+                onValueChange = {
+                    text = it.copy(
+                        text = it.text,
+                        selection = TextRange(it.text.length)
                     )
                 },
                 enabled = false,

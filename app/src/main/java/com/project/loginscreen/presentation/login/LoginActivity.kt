@@ -33,13 +33,19 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -61,6 +67,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.Lifecycling
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
@@ -79,6 +86,10 @@ import com.project.loginscreen.presentation.theme.LoginScreenTheme
 import com.project.loginscreen.presentation.user.UserEvent
 import com.project.loginscreen.presentation.user.UserViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 
 
@@ -115,6 +126,7 @@ class LoginActivity : ComponentActivity() {
         }
     }
 }
+
 @Composable
 fun setUpNavHost(navController: NavHostController, viewModel: UserViewModel) {
     NavHost(
@@ -143,11 +155,15 @@ fun setUpNavHost(navController: NavHostController, viewModel: UserViewModel) {
                     defaultValue = ""
                     nullable = true
                 }
-            ) ,
+            ),
             enterTransition = { slideIntoContainer(towards = AnimatedContentTransitionScope.SlideDirection.Start) },
             exitTransition = { slideOutOfContainer(towards = AnimatedContentTransitionScope.SlideDirection.Start) }
-        ) {entry ->
-            PasswordCheckLoader(navController = navController, name = entry.arguments?.getString("name"), viewModel = viewModel)
+        ) { entry ->
+            PasswordCheckLoader(
+                navController = navController,
+                name = entry.arguments?.getString("name"),
+                viewModel = viewModel
+            )
         }
         composable(
             route = Screen.Success.route,
@@ -293,7 +309,7 @@ private fun socialMediaLogin(
         ) {
             Spacer(modifier = Modifier.padding(10.dp))
             Button(
-                onClick = {  },
+                onClick = { },
                 modifier = modifier,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFFFFFFFF),
@@ -330,7 +346,7 @@ private fun socialMediaLogin(
         ) {
             Spacer(modifier = Modifier.padding(10.dp))
             Button(
-                onClick = {  },
+                onClick = { },
                 modifier = modifier,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFFFFFFFF),
@@ -362,7 +378,7 @@ private fun socialMediaLogin(
     }
 }
 
-@SuppressLint("ComposableNaming")
+@SuppressLint("ComposableNaming", "UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun loginLabel(
@@ -381,108 +397,140 @@ fun loginLabel(
     var isFocused by remember { mutableStateOf(false) }
     var validFormNameFlag by remember { mutableStateOf(false) }
     var isValid by remember { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
+    var eventKey by remember { mutableStateOf(false) }
 
 
-    Column(modifier) {
-        Row(
-            Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ) {
-            if (validFormNameFlag) {
-                AlertDialogBox(
-                    text = "Insira um nome ou crie uma conta clicando em 'inscreva-se'.",
-                    openDialog = validFormNameFlag,
-                    onDismiss = {
-                        validFormNameFlag = false
-                    }
-                )
-            }
-            OutlinedTextField(
-                value = text,
-                label = {
-                    Text(
-                        text = label,
-                        fontWeight = FontWeight.Light
-                    )
-                },
-                maxLines = 1,
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-                onValueChange = { input: TextFieldValue ->
-                    val changeValue: String = input.text.ifBlank {
-                        val toast =
-                            Toast.makeText(context, "Conta nao encontrada", Toast.LENGTH_SHORT)
-                        toast.show()
-                        input.text.toString()
-                    }
-                    text = input.copy(
-                        text = changeValue,
-                        selection = TextRange(changeValue.length)
-                    )
-                    viewModel.onEvent(UserEvent.EnteredName(text.text))
-                },
-                modifier = Modifier
-                    .clip(shape = RoundedCornerShape(3.dp))
-                    .border(BorderStroke(0.8.dp, if (isFocused) Color(0xFF4FBEF0) else Color.Gray))
-                    .onFocusChanged {
-                        isFocused = it.isFocused
-                    },
-                colors = TextFieldDefaults.colors(
-                    focusedTextColor = Color.White,
-                    focusedContainerColor = Color.Black,
-                    unfocusedContainerColor = Color.Black,
-                    disabledContainerColor = Color.Black,
-                    cursorColor = Color.White,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    disabledIndicatorColor = Color.Transparent,
-                ),
-            )
-        }
-        Spacer(modifier = Modifier.padding(15.dp))
-        Row(
-            Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Box(
-                modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.Center,
+    Scaffold(
+        modifier = Modifier.background(color = Color.Transparent),
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState)
+        },
+        contentColor = Color.Transparent,
+        containerColor = Color.Transparent
+    ) {
+        Column(modifier) {
+            Row(
+                Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
             ) {
-                bottomContent(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .fillMaxHeight()
-                        .align(Alignment.Center),
-                    text = "Avançar",
-                    password = "Esqueceu sua senha?",
-                    showPassButton = keyPass,
-                    showNextButton = keyNext,
-                    accountMessage = accountMessage,
-                    entry = entry,
-                    showText = showText,
-                    createAccount = {
-                        navController.navigate(Screen.SignUpScreen.route)
-                    },
-                    toFeed = {
-                        isValid = text.text.isNotEmpty()
-                        if (isValid) {
+                if (validFormNameFlag) {
+                    AlertDialogBox(
+                        text = "Insira um nome ou crie uma conta clicando em 'inscreva-se'.",
+                        openDialog = validFormNameFlag,
+                        onDismiss = {
                             validFormNameFlag = false
-                            viewModel.searchUserExists(text.text)
-                            navController.navigate(Screen.PasswordScreen.withArgs(text.text))
                         }
-                        else {
-                            validFormNameFlag = true
-                        }
+                    )
+                }
+                OutlinedTextField(
+                    value = text,
+                    label = {
+                        Text(
+                            text = label,
+                            fontWeight = FontWeight.Light
+                        )
                     },
+                    maxLines = 1,
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+                    onValueChange = {
+                        text = it.copy(
+                            text = it.text,
+                            selection = TextRange(it.text.length)
+                        )
+                        viewModel.onEvent(UserEvent.EnteredName(text.text))
+                    },
+                    modifier = Modifier
+                        .clip(shape = RoundedCornerShape(3.dp))
+                        .border(
+                            BorderStroke(
+                                0.8.dp,
+                                if (isFocused) Color(0xFF4FBEF0) else Color.Gray
+                            )
+                        )
+                        .onFocusChanged {
+                            isFocused = it.isFocused
+                        },
+                    colors = TextFieldDefaults.colors(
+                        focusedTextColor = Color.White,
+                        focusedContainerColor = Color.Black,
+                        unfocusedContainerColor = Color.Black,
+                        disabledContainerColor = Color.Black,
+                        cursorColor = Color.White,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        disabledIndicatorColor = Color.Transparent,
+                    ),
                 )
             }
-        }
+            Spacer(modifier = Modifier.padding(15.dp))
+            Row(
+                Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    bottomContent(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .fillMaxHeight()
+                            .align(Alignment.Center),
+                        text = "Avançar",
+                        password = "Esqueceu sua senha?",
+                        showPassButton = keyPass,
+                        showNextButton = keyNext,
+                        accountMessage = accountMessage,
+                        entry = entry,
+                        showText = showText,
+                        createAccount = {
+                            navController.navigate(Screen.SignUpScreen.route)
+                        },
+                        toFeed = {
+                            isValid = text.text.isNotEmpty()
+                            if (isValid) {
+                                validFormNameFlag = false
+                                eventKey = true
+                                viewModel.searchUserExists(text.text)
 
+                            } else {
+                                validFormNameFlag = true
+                            }
+                        },
+                    )
+                    LaunchedEffect(key1 = viewModel) {
+                        Log.d("ANTES","NADA")
+                        viewModel.eventFlow.collect { event ->
+                            Log.d("CLAUDINHO","BOCHECHA")
+                            when (event) {
+                                is UserViewModel.UiEvent.ShowMessage -> {
+                                    if (event.key) {
+                                        snackbarHostState.showSnackbar(
+                                            message = event.message
+                                        )
+                                    }
+                                }
+                                is UserViewModel.UiEvent.UserExists -> {
+                                    if (eventKey) {
+                                        Log.d("FOI","PASSOU")
+                                        eventKey = false
+                                        navController.navigate(Screen.PasswordScreen.withArgs(event.userName))
+                                    }
+                                }
+                                else -> { eventKey = false }
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }
-@SuppressLint("ComposableNaming")
+
 @Composable
 fun bottomContent(
     modifier: Modifier,
@@ -496,7 +544,7 @@ fun bottomContent(
     createAccount: () -> Unit,
     toFeed: () -> Unit,
 
-) {
+    ) {
     Column(modifier) {
         if (showNextButton) {
             Row(
@@ -534,7 +582,7 @@ fun bottomContent(
                 horizontalArrangement = Arrangement.Center
             ) {
                 Button(
-                    onClick = {  },
+                    onClick = { },
                     modifier = Modifier
                         .height(40.dp)
                         .border(

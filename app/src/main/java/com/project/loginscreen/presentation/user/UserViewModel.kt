@@ -6,10 +6,13 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
+import com.project.loginscreen.data.model.entities.InvalidUserException
 import com.project.loginscreen.data.model.entities.UserEntity
 import com.project.loginscreen.presentation.user.use_cases.ListUsers
 import com.project.loginscreen.presentation.user.use_cases.UserUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -31,6 +34,9 @@ class UserViewModel @Inject constructor(
 
     private val _userBirthday = mutableStateOf(TextFieldValue(""))
     val userBirthday = _userBirthday
+
+    private val _eventFlow = MutableSharedFlow<UiEvent>()
+    val eventFlow = _eventFlow.asSharedFlow()
 
     fun onEvent(event: UserEvent) {
         when (event) {
@@ -67,17 +73,21 @@ class UserViewModel @Inject constructor(
                                 name = userName.value.text,
                                 email = userEmail.value.text,
                                 password = userPassword.value.text,
-                                birthDate = userBirthday.value.text.toLong()
+                                birthDate = userBirthday.value.text.toLongOrNull()
                             )
                         )
-                    } catch (e: Exception) {
-                        throw e
-//                        throw InvalidUserException("ERROR: Error in user insert.") // Remover e definir um aviso para a UI
+                        Log.d("CRIANDO USUARIO","ALGUMA VEZ")
+                        _eventFlow.emit(UiEvent.SaveUser)
+                    } catch (e: InvalidUserException) {
+                        _eventFlow.emit(
+                            UiEvent.ShowMessage(
+                                message = e.message ?: "Erro ao tentar criar a conta."
+                            )
+                        )
                     }
                 }
             }
 
-            else -> {}
         }
     }
     fun showAllUsers() {
@@ -88,43 +98,74 @@ class UserViewModel @Inject constructor(
             }
         }
     }
-
     fun searchName(name: String) {
         viewModelScope.launch {
-            if (useCases.compareUser(name) != null) {
-                throw Exception("Nome ja existe")
+            val user = useCases.compareUser(name)
+            if (name == user?.name) {
+                _eventFlow.emit(
+                    UiEvent.ShowMessage(
+                        message = "Este nome ja esta em uso, tente outro.",
+                        key = true
+                    )
+                )
+            } else {
+                _eventFlow.emit(UiEvent.SaveUser)
             }
         }
-        return
     }
 
-    fun searchUserExists(name: String) : String {
+    fun searchUserExists(name: String) {
         viewModelScope.launch {
-            if (useCases.compareUser(name) == null) {
-                throw Exception("Usuario nao existe")
+            val user = useCases.compareUser(name)
+            if (user == null) {
+                _eventFlow.emit(
+                    UiEvent.ShowMessage(
+                        message = "Usuário não existe",
+                        key = true
+                    )
+                )
+            } else {
+                _eventFlow.emit(UiEvent.UserExists(name))
             }
         }
-        return name
     }
 
     fun searchEmail(email: String) {
         viewModelScope.launch {
-            if (useCases.compareEmail(email) != null) {
-                println(useCases.compareEmail(email))
-                throw Exception("Email ja existe")
+            val user = useCases.compareEmail(email)
+            if (email == user?.email) {
+                _eventFlow.emit(
+                    UiEvent.ShowMessage(
+                        message = "Este email ja esta em uso em outra conta, tente outro.",
+                        key = true
+                    )
+                )
+            } else {
+                _eventFlow.emit(UiEvent.SaveUser)
             }
         }
-        return
     }
 
     fun searchPass(name: String, password: String) {
         viewModelScope.launch {
-            useCases.comparePass(name, password)
-            if (userPassword.value.text != password) {
-                Log.d("TESTE","senha ${userPassword.value.text} nao confere")
-                throw Exception("Senha nao confere")
+            val user = useCases.comparePass(name,password)
+            if (password != user?.password) {
+                _eventFlow.emit(
+                    UiEvent.ShowMessage(
+                        message = "Senha errada, tente novamente.",
+                        key = true
+                    )
+                )
+            } else {
+                _eventFlow.emit(UiEvent.SaveUser)
             }
         }
-        return
+    }
+
+    sealed class UiEvent {
+        data class ShowMessage(val message: String, val key: Boolean = false) : UiEvent()
+        data class UserExists(val userName: String) : UiEvent()
+        object SaveUser: UiEvent()
+
     }
 }

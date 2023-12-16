@@ -1,5 +1,6 @@
 package com.project.loginscreen.presentation.login
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -31,11 +32,15 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -93,6 +98,7 @@ class SignUpActivity : ComponentActivity() {
     }
 }
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SignUpScreenLoader(navController: NavController, viewModel: UserViewModel) {
@@ -107,381 +113,412 @@ fun SignUpScreenLoader(navController: NavController, viewModel: UserViewModel) {
     var isValidPassword by remember { mutableStateOf(false) }
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
     var selectedDate by remember { mutableStateOf(TextFieldValue("")) }
+    val snackbarHostState = remember { SnackbarHostState() }
+    var eventKey by remember { mutableStateOf(false) }
 
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFF000000)),
-        verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.CenterHorizontally
+    Scaffold(
+        modifier = Modifier.background(color = Color.Transparent),
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState)
+        },
+        contentColor = Color.Transparent,
+        containerColor = Color.Transparent
     ) {
-        if (validFormNameFlag) {
-            AlertDialogBox(
-                text = "Nenhum Campo pode ser vazio, por favor verifique seus dados.",
-                openDialog = validFormNameFlag,
-                onDismiss = {
-                    validFormNameFlag = false
-                }
-            )
-        }
-        Row(
-            verticalAlignment = Alignment.Top,
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Spacer(modifier = Modifier.padding(top = 10.dp))
-
-            Image(
-                painter = painterResource(R.drawable.x_logo),
-                contentDescription = "X social media Logo",
-                modifier = Modifier
-                    .size(70.dp)
-                    .padding(top = 30.dp),
-            )
-        }
-        Spacer(modifier = Modifier.padding(10.dp))
-        Row {
-            welcomeText(
-                text = "Criar sua conta",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 30.dp),
-            )
-        }
-        Spacer(modifier = Modifier.padding(10.dp))
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Column(
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Spacer(modifier = Modifier.padding(5.dp))
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    OutlinedTextField(
-                        value = name,
-                        label = {
-                            Text(
-                                text = "Nome",
-                                fontWeight = FontWeight.Light
-                            )
-                        },
-                        maxLines = 1,
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-                        onValueChange = {
-                            name = it.copy(
-                                text = it.text,
-                                selection = TextRange(it.text.length)
-                            )
-                            viewModel.searchName(name.text)
-                            viewModel.onEvent(UserEvent.EnteredName(name.text))
-                        },
-                        modifier = Modifier
-                            .clip(shape = RoundedCornerShape(3.dp))
-                            .border(
-                                BorderStroke(
-                                    0.8.dp,
-                                    if (isFocused) Color(0xFF4FBEF0) else Color.Gray
-                                )
-                            )
-                            .onFocusChanged {
-                                isFocused = it.isFocused
-                            },
-                        colors = TextFieldDefaults.colors(
-                            focusedTextColor = Color.White,
-                            unfocusedTextColor = Color.LightGray,
-                            focusedContainerColor = Color.Transparent,
-                            unfocusedContainerColor = Color.Transparent,
-                            disabledContainerColor = Color.Gray,
-                            cursorColor = Color.White,
-                            focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent,
-                            disabledIndicatorColor = Color.Transparent,
-                        ),
-                    )
-                }
-                Spacer(modifier = Modifier.padding(5.dp))
-            }
-        }
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Column(
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Spacer(modifier = Modifier.padding(5.dp))
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    var isFocusEmail by remember {
-                        mutableStateOf(false)
-                    }
-                    OutlinedTextField(
-                        value = email,
-                        label = {
-                            Text(
-                                text = "Email",
-                                fontWeight = FontWeight.Light
-                            )
-                        },
-                        maxLines = 1,
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-                        onValueChange = {
-                            email = it.copy(
-                                text = it.text,
-                                selection = TextRange(it.text.length)
-                            )
-                            viewModel.searchEmail(email.text)
-                            viewModel.onEvent(UserEvent.EnteredEmail(email.text))
-                        },
-                        modifier = Modifier
-                            .clip(shape = RoundedCornerShape(3.dp))
-                            .border(
-                                BorderStroke(
-                                    0.8.dp,
-                                    if (isFocusEmail) Color(0xFF4FBEF0) else Color.Gray
-                                )
-                            )
-                            .onFocusChanged {
-                                isFocusEmail = it.isFocused
-                            },
-                        colors = TextFieldDefaults.colors(
-                            focusedTextColor = Color.White,
-                            unfocusedTextColor = Color.LightGray,
-                            focusedContainerColor = Color.Transparent,
-                            unfocusedContainerColor = Color.Transparent,
-                            disabledContainerColor = Color.Gray,
-                            cursorColor = Color.White,
-                            focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent,
-                            disabledIndicatorColor = Color.Transparent,
-                        ),
-                    )
-                }
-                Spacer(modifier = Modifier.padding(5.dp))
-            }
-        }
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Start
-        ) {
-            Column(
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Spacer(modifier = Modifier.padding(5.dp))
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    var isFocusPassword by remember {
-                        mutableStateOf(false)
-                    }
-                    OutlinedTextField(
-                        value = password,
-                        label = {
-                            Text(
-                                text = "Senha",
-                                fontWeight = FontWeight.Light
-                            )
-                        },
-                        maxLines = 1,
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                        onValueChange = {
-                            password = it.copy(
-                                text = it.text,
-                                selection = TextRange(it.text.length)
-                            )
-                            viewModel.onEvent(UserEvent.EnteredPassword(password.text))
-                        },
-                        modifier = Modifier
-                            .clip(shape = RoundedCornerShape(3.dp))
-                            .border(
-                                BorderStroke(
-                                    0.8.dp,
-                                    if (isFocusPassword) Color(0xFF4FBEF0) else Color.Gray
-                                )
-                            )
-                            .onFocusChanged {
-                                isFocusPassword = it.isFocused
-                            },
-                        colors = TextFieldDefaults.colors(
-                            focusedTextColor = Color.White,
-                            unfocusedTextColor = Color.LightGray,
-                            focusedContainerColor = Color.Black,
-                            unfocusedContainerColor = Color.Black,
-                            disabledContainerColor = Color.Black,
-                            cursorColor = Color.White,
-                            focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent,
-                            disabledIndicatorColor = Color.Transparent,
-                        ),
-                        visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                        trailingIcon = {
-                            val image = if (passwordVisible)
-                                Icons.Filled.Visibility
-                            else Icons.Filled.VisibilityOff
-
-                            val description =
-                                if (passwordVisible) "Hide password" else "Show password"
-                            IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                                Icon(
-                                    imageVector = image,
-                                    contentDescription = description,
-                                )
-                            }
-                        }
-                    )
-                }
-            }
-        }
-        Row(
+        Column(
             modifier = Modifier
-                .padding(10.dp)
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.Start,
-            verticalAlignment = Alignment.CenterVertically
+                .fillMaxSize()
+                .background(Color(0xFF000000)),
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            BirthdayText(
+            if (validFormNameFlag) {
+                AlertDialogBox(
+                    text = "Nenhum Campo pode ser vazio, por favor verifique seus dados.",
+                    openDialog = validFormNameFlag,
+                    onDismiss = {
+                        validFormNameFlag = false
+                    }
+                )
+            }
+            Row(
+                verticalAlignment = Alignment.Top,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Spacer(modifier = Modifier.padding(top = 10.dp))
+
+                Image(
+                    painter = painterResource(R.drawable.x_logo),
+                    contentDescription = "X social media Logo",
+                    modifier = Modifier
+                        .size(70.dp)
+                        .padding(top = 30.dp),
+                )
+            }
+            Spacer(modifier = Modifier.padding(10.dp))
+            Row {
+                welcomeText(
+                    text = "Criar sua conta",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 30.dp),
+                )
+            }
+            Spacer(modifier = Modifier.padding(10.dp))
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Column(
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Spacer(modifier = Modifier.padding(5.dp))
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        OutlinedTextField(
+                            value = name,
+                            label = {
+                                Text(
+                                    text = "Nome",
+                                    fontWeight = FontWeight.Light
+                                )
+                            },
+                            maxLines = 1,
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+                            onValueChange = {
+                                name = it.copy(
+                                    text = it.text,
+                                    selection = TextRange(it.text.length)
+                                )
+                                viewModel.onEvent(UserEvent.EnteredName(name.text))
+                            },
+                            modifier = Modifier
+                                .clip(shape = RoundedCornerShape(3.dp))
+                                .border(
+                                    BorderStroke(
+                                        0.8.dp,
+                                        if (isFocused) Color(0xFF4FBEF0) else Color.Gray
+                                    )
+                                )
+                                .onFocusChanged {
+                                    isFocused = it.isFocused
+                                },
+                            colors = TextFieldDefaults.colors(
+                                focusedTextColor = Color.White,
+                                unfocusedTextColor = Color.LightGray,
+                                focusedContainerColor = Color.Transparent,
+                                unfocusedContainerColor = Color.Transparent,
+                                disabledContainerColor = Color.Gray,
+                                cursorColor = Color.White,
+                                focusedIndicatorColor = Color.Transparent,
+                                unfocusedIndicatorColor = Color.Transparent,
+                                disabledIndicatorColor = Color.Transparent,
+                            ),
+                        )
+                    }
+                    Spacer(modifier = Modifier.padding(5.dp))
+                }
+            }
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Column(
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Spacer(modifier = Modifier.padding(5.dp))
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        var isFocusEmail by remember {
+                            mutableStateOf(false)
+                        }
+                        OutlinedTextField(
+                            value = email,
+                            label = {
+                                Text(
+                                    text = "Email",
+                                    fontWeight = FontWeight.Light
+                                )
+                            },
+                            maxLines = 1,
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+                            onValueChange = {
+                                email = it.copy(
+                                    text = it.text,
+                                    selection = TextRange(it.text.length)
+                                )
+                                viewModel.onEvent(UserEvent.EnteredEmail(email.text))
+                            },
+                            modifier = Modifier
+                                .clip(shape = RoundedCornerShape(3.dp))
+                                .border(
+                                    BorderStroke(
+                                        0.8.dp,
+                                        if (isFocusEmail) Color(0xFF4FBEF0) else Color.Gray
+                                    )
+                                )
+                                .onFocusChanged {
+                                    isFocusEmail = it.isFocused
+                                },
+                            colors = TextFieldDefaults.colors(
+                                focusedTextColor = Color.White,
+                                unfocusedTextColor = Color.LightGray,
+                                focusedContainerColor = Color.Transparent,
+                                unfocusedContainerColor = Color.Transparent,
+                                disabledContainerColor = Color.Gray,
+                                cursorColor = Color.White,
+                                focusedIndicatorColor = Color.Transparent,
+                                unfocusedIndicatorColor = Color.Transparent,
+                                disabledIndicatorColor = Color.Transparent,
+                            ),
+                        )
+                    }
+                    Spacer(modifier = Modifier.padding(5.dp))
+                }
+            }
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Start
+            ) {
+                Column(
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Spacer(modifier = Modifier.padding(5.dp))
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        var isFocusPassword by remember {
+                            mutableStateOf(false)
+                        }
+                        OutlinedTextField(
+                            value = password,
+                            label = {
+                                Text(
+                                    text = "Senha",
+                                    fontWeight = FontWeight.Light
+                                )
+                            },
+                            maxLines = 1,
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                            onValueChange = {
+                                password = it.copy(
+                                    text = it.text,
+                                    selection = TextRange(it.text.length)
+                                )
+                                viewModel.onEvent(UserEvent.EnteredPassword(password.text))
+                            },
+                            modifier = Modifier
+                                .clip(shape = RoundedCornerShape(3.dp))
+                                .border(
+                                    BorderStroke(
+                                        0.8.dp,
+                                        if (isFocusPassword) Color(0xFF4FBEF0) else Color.Gray
+                                    )
+                                )
+                                .onFocusChanged {
+                                    isFocusPassword = it.isFocused
+                                },
+                            colors = TextFieldDefaults.colors(
+                                focusedTextColor = Color.White,
+                                unfocusedTextColor = Color.LightGray,
+                                focusedContainerColor = Color.Black,
+                                unfocusedContainerColor = Color.Black,
+                                disabledContainerColor = Color.Black,
+                                cursorColor = Color.White,
+                                focusedIndicatorColor = Color.Transparent,
+                                unfocusedIndicatorColor = Color.Transparent,
+                                disabledIndicatorColor = Color.Transparent,
+                            ),
+                            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                            trailingIcon = {
+                                val image = if (passwordVisible)
+                                    Icons.Filled.Visibility
+                                else Icons.Filled.VisibilityOff
+
+                                val description =
+                                    if (passwordVisible) "Hide password" else "Show password"
+                                IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                                    Icon(
+                                        imageVector = image,
+                                        contentDescription = description,
+                                    )
+                                }
+                            }
+                        )
+                    }
+                }
+            }
+            Row(
                 modifier = Modifier
                     .padding(10.dp)
-            )
-        }
-        Row(
-            modifier = Modifier
-                .padding(20.dp)
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-
-            var showDataDialog by remember { mutableStateOf(false) }
-            val datePickerState = rememberDatePickerState()
-            val focusManager = LocalFocusManager.current
-
-            if (showDataDialog) {
-                DatePickerDialog(
-                    onDismissRequest = { showDataDialog = false },
-                    confirmButton = {
-                        Button(
-                            onClick = {
-                                datePickerState.selectedDateMillis?.let { millis ->
-                                    val formattedDate = millis.toBrazilianDateFormat()
-                                    selectedDate = TextFieldValue(text = formattedDate)
-                                    viewModel.onEvent(UserEvent.EnteredBirthday(selectedDate.text.replace("/","")))
-                                }
-                                showDataDialog = false
-                            }
-                        ) {
-                            Text(text = "Escolher data")
-                        }
-                    }
-                ) {
-                    DatePicker(state = datePickerState)
-                }
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.Start,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                BirthdayText(
+                    modifier = Modifier
+                        .padding(10.dp)
+                )
             }
-            var isFocusDate by remember {
-                mutableStateOf(false)
-            }
-            OutlinedTextField(
-                value = selectedDate,
-                label = {
-                    Text(
-                        text = "Data de nascimento",
-                        fontWeight = FontWeight.Light
-                    )
-                },
-                maxLines = 1,
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                onValueChange = {
-                    selectedDate = it.copy(
-                        text = it.text
-                    )
-                },
+            Row(
                 modifier = Modifier
-                    .clip(shape = RoundedCornerShape(3.dp))
-                    .border(
-                        BorderStroke(
-                            0.8.dp,
-                            if (isFocusDate) Color(0xFF4FBEF0) else Color.Gray
+                    .padding(20.dp)
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+
+                var showDataDialog by remember { mutableStateOf(false) }
+                val datePickerState = rememberDatePickerState()
+                val focusManager = LocalFocusManager.current
+
+                if (showDataDialog) {
+                    DatePickerDialog(
+                        onDismissRequest = { showDataDialog = false },
+                        confirmButton = {
+                            Button(
+                                onClick = {
+                                    datePickerState.selectedDateMillis?.let { millis ->
+                                        val formattedDate = millis.toBrazilianDateFormat()
+                                        selectedDate = TextFieldValue(text = formattedDate)
+                                        viewModel.onEvent(UserEvent.EnteredBirthday(selectedDate.text.replace("/","")))
+                                    }
+                                    showDataDialog = false
+                                }
+                            ) {
+                                Text(text = "Escolher data")
+                            }
+                        }
+                    ) {
+                        DatePicker(state = datePickerState)
+                    }
+                }
+                val isFocusDate by remember {
+                    mutableStateOf(false)
+                }
+                OutlinedTextField(
+                    value = selectedDate,
+                    label = {
+                        Text(
+                            text = "Data de nascimento",
+                            fontWeight = FontWeight.Light
                         )
-                    ).onFocusChanged {
-                        if (it.isFocused) {
-                            showDataDialog = true
-                            focusManager.clearFocus(force = true)
+                    },
+                    maxLines = 1,
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    onValueChange = {
+                        selectedDate = it.copy(
+                            text = it.text
+                        )
+                    },
+                    modifier = Modifier
+                        .clip(shape = RoundedCornerShape(3.dp))
+                        .border(
+                            BorderStroke(
+                                0.8.dp,
+                                if (isFocusDate) Color(0xFF4FBEF0) else Color.Gray
+                            )
+                        )
+                        .onFocusChanged {
+                            if (it.isFocused) {
+                                showDataDialog = true
+                                focusManager.clearFocus(force = true)
+                            }
+                        },
+
+                    colors = TextFieldDefaults.colors(
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.LightGray,
+                        focusedContainerColor = Color.Black,
+                        unfocusedContainerColor = Color.Black,
+                        disabledContainerColor = Color.Black,
+                        cursorColor = Color.White,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        disabledIndicatorColor = Color.Transparent,
+                    ),
+                    trailingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.DateRange,
+                            contentDescription = "DateButton",
+                        )
+                    }
+                )
+            }
+            Row(
+                modifier = Modifier.fillMaxHeight(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                bottomContent(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .fillMaxHeight()
+                        .padding(20.dp)
+                        .align(Alignment.CenterVertically),
+                    showNextButton = true,
+                    text = "Avançar",
+                    showPassButton = false,
+                    showText = true,
+                    accountMessage = "Já tem uma conta?",
+                    entry = "Faça login",
+                    createAccount = {
+                        navController.navigate(Screen.LoginScreen.route)
+                    },
+                    toFeed = {
+                        isValidName = name.text.isNotEmpty()
+                        isValidEmail = email.text.isNotEmpty()
+                        isValidPassword = password.text.isNotEmpty()
+
+                        if (isValidName && isValidEmail && isValidPassword) {
+                            validFormNameFlag = false
+//                            eventKey = true
+                            viewModel.searchName(name.text)
+                            viewModel.searchEmail(email.text)
+
+                        } else {
+                            validFormNameFlag = true
                         }
                     },
-
-                colors = TextFieldDefaults.colors(
-                    focusedTextColor = Color.White,
-                    unfocusedTextColor = Color.LightGray,
-                    focusedContainerColor = Color.Black,
-                    unfocusedContainerColor = Color.Black,
-                    disabledContainerColor = Color.Black,
-                    cursorColor = Color.White,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    disabledIndicatorColor = Color.Transparent,
-                ),
-                trailingIcon = {
-                    Icon(
-                        imageVector = Icons.Default.DateRange,
-                        contentDescription = "DateButton",
-                    )
-                }
-            )
-        }
-        Row(
-            modifier = Modifier.fillMaxHeight(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ) {
-            bottomContent(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight()
-                    .padding(20.dp)
-                    .align(Alignment.CenterVertically),
-                showNextButton = true,
-                text = "Avançar",
-                showPassButton = false,
-                showText = true,
-                accountMessage = "Já tem uma conta?",
-                entry = "Faça login",
-                createAccount = {
-                    navController.navigate(Screen.LoginScreen.route)
-                },
-                toFeed = {
-                    isValidName = name.text.isNotEmpty()
-                    isValidEmail = email.text.isNotEmpty()
-                    isValidPassword = password.text.isNotEmpty()
-
-                    if (isValidName && isValidEmail && isValidPassword) {
-                        validFormNameFlag = false
-                        navController.navigate(Screen.Success.route)
-                        Log.d("NAME","value: $name")
-                        Log.d("EMAIL","value: $email")
-                        Log.d("PASSWORD","value: $password")
-                        Log.d("DATE","value: ${selectedDate.text}")
-
-                        viewModel.onEvent(UserEvent.SaveUser)
-
-                    } else {
-                        validFormNameFlag = true
+                )
+                LaunchedEffect(key1 = viewModel) {
+                    viewModel.eventFlow.collect { event ->
+                        when (event) {
+                            is UserViewModel.UiEvent.ShowMessage -> {
+                                if (event.key) {
+                                    snackbarHostState.showSnackbar(
+                                        message = event.message
+                                    )
+                                }
+                                Log.d("FIU FIU","OLHA A MENSAGEM")
+                            }
+                            is UserViewModel.UiEvent.SaveUser -> {
+                                if (!eventKey) {
+                                    Log.d("FOI","Passou")
+                                    eventKey = false
+                                    viewModel.onEvent(UserEvent.SaveUser)
+                                    navController.navigate(Screen.Success.route)
+                                }
+                            }
+                            else -> {
+                                Log.d("CAIU","CAIU NO ELSE")
+                                eventKey = false
+                            }
+                        }
                     }
-                },
-            )
+                }
+            }
         }
     }
 }

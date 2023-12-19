@@ -503,9 +503,7 @@ fun loginLabel(
                         },
                     )
                     LaunchedEffect(key1 = viewModel) {
-                        Log.d("ANTES","NADA")
                         viewModel.eventFlow.collect { event ->
-                            Log.d("CLAUDINHO","BOCHECHA")
                             when (event) {
                                 is UserViewModel.UiEvent.ShowMessage -> {
                                     if (event.key) {
@@ -516,7 +514,6 @@ fun loginLabel(
                                 }
                                 is UserViewModel.UiEvent.UserExists -> {
                                     if (eventKey) {
-                                        Log.d("FOI","PASSOU")
                                         eventKey = false
                                         navController.navigate(Screen.PasswordScreen.withArgs(event.userName))
                                     }

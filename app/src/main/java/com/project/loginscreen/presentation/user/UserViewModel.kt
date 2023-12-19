@@ -11,6 +11,7 @@ import com.project.loginscreen.data.model.entities.UserEntity
 import com.project.loginscreen.presentation.user.use_cases.ListUsers
 import com.project.loginscreen.presentation.user.use_cases.UserUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
@@ -76,7 +77,6 @@ class UserViewModel @Inject constructor(
                                 birthDate = userBirthday.value.text.toLongOrNull()
                             )
                         )
-                        Log.d("CRIANDO USUARIO","ALGUMA VEZ")
                         _eventFlow.emit(UiEvent.SaveUser)
                     } catch (e: InvalidUserException) {
                         _eventFlow.emit(
@@ -87,7 +87,6 @@ class UserViewModel @Inject constructor(
                     }
                 }
             }
-
         }
     }
     fun showAllUsers() {
@@ -101,10 +100,10 @@ class UserViewModel @Inject constructor(
     fun searchName(name: String) {
         viewModelScope.launch {
             val user = useCases.compareUser(name)
-            if (name == user?.name) {
+            if (name.equals(user?.name, ignoreCase = true)) {
                 _eventFlow.emit(
                     UiEvent.ShowMessage(
-                        message = "Este nome ja esta em uso, tente outro.",
+                        message = "Este nome já está em uso, tente outro.",
                         key = true
                     )
                 )
@@ -133,10 +132,10 @@ class UserViewModel @Inject constructor(
     fun searchEmail(email: String) {
         viewModelScope.launch {
             val user = useCases.compareEmail(email)
-            if (email == user?.email) {
+            if (email.equals(user?.email, ignoreCase = true)) {
                 _eventFlow.emit(
                     UiEvent.ShowMessage(
-                        message = "Este email ja esta em uso em outra conta, tente outro.",
+                        message = "Este e-mail já está em uso em outra conta, tente outro.",
                         key = true
                     )
                 )

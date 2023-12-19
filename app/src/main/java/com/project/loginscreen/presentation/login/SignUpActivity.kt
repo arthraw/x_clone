@@ -33,6 +33,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
@@ -75,6 +76,8 @@ import com.project.loginscreen.presentation.theme.LoginScreenTheme
 import com.project.loginscreen.presentation.user.UserEvent
 import com.project.loginscreen.presentation.user.UserViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -483,9 +486,12 @@ fun SignUpScreenLoader(navController: NavController, viewModel: UserViewModel) {
 
                         if (isValidName && isValidEmail && isValidPassword) {
                             validFormNameFlag = false
-//                            eventKey = true
+                            eventKey = true
                             viewModel.searchName(name.text)
                             viewModel.searchEmail(email.text)
+                            viewModel.onEvent(UserEvent.SaveUser)
+
+
 
                         } else {
                             validFormNameFlag = true
@@ -493,26 +499,23 @@ fun SignUpScreenLoader(navController: NavController, viewModel: UserViewModel) {
                     },
                 )
                 LaunchedEffect(key1 = viewModel) {
-                    viewModel.eventFlow.collect { event ->
+                    viewModel.eventFlow.collectLatest { event ->
                         when (event) {
                             is UserViewModel.UiEvent.ShowMessage -> {
                                 if (event.key) {
                                     snackbarHostState.showSnackbar(
-                                        message = event.message
+                                        message = event.message,
+                                        withDismissAction = eventKey,
                                     )
                                 }
-                                Log.d("FIU FIU","OLHA A MENSAGEM")
                             }
                             is UserViewModel.UiEvent.SaveUser -> {
                                 if (!eventKey) {
-                                    Log.d("FOI","Passou")
                                     eventKey = false
-                                    viewModel.onEvent(UserEvent.SaveUser)
                                     navController.navigate(Screen.Success.route)
                                 }
                             }
                             else -> {
-                                Log.d("CAIU","CAIU NO ELSE")
                                 eventKey = false
                             }
                         }
